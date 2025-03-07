@@ -8,7 +8,8 @@
             </tr>
         </thead>
         <tbody>
-            @slot('body')
+            {{-- @slot('body') --}}
+            {{ $slot }}
         </tbody>
     </table>
 </div>

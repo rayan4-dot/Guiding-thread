@@ -40,9 +40,8 @@
     <x-card>
         <h2 class="card-title mb-4">All Users</h2>
         <x-table :headers="['User', 'Joined', 'Last Active', 'Posts', 'Status', 'Actions']">
-            @slot('body')
-                <tr>
-                    <td>
+            <tr>
+                <td>
                         <div class="flex items-center gap-3">
                             <div class="avatar">
                                 <div class="w-12 rounded-full">
@@ -233,7 +232,6 @@
                         </div>
                     </td>
                 </tr>
-            @endslot
         </x-table>
         
         <!-- Pagination -->

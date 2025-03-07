@@ -11,10 +11,13 @@
         "axios": "^1.7.4",
         "bootstrap": "^5.2.3",
         "concurrently": "^9.0.1",
+        "init": "^0.1.2",
         "laravel-vite-plugin": "^1.2.0",
-        "postcss": "^8.4.47",
-        "sass": "^1.56.1",
-        "tailwindcss": "^3.4.13",
+        "node-sass": "^9.0.0",
+        "npx": "^10.2.2",
+        "postcss": "^8.5.3",
+        "sass": "^1.85.1",
+        "tailwindcss": "^3.4.17",
         "vite": "^6.0.11"
     }
 }
