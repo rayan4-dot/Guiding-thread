@@ -50,25 +50,7 @@
 @section('content')
   <!-- Main Content -->
   <main class="flex-1 overflow-y-auto p-4 lg:p-6 bg-base-100">
-            <!-- Page Header -->
-            <!-- <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-6">
-          <div>
-            <h1 class="text-2xl font-bold">Notifications</h1>
-            <p class="text-sm opacity-70">Manage and review platform notifications</p>
-          </div>
-          <div class="mt-4 lg:mt-0 flex flex-col sm:flex-row gap-2">
-            <div class="join">
-              <div class="form-control">
-                <div class="input-group">
-                  <input type="text" placeholder="Search notifications..." class="input input-sm input-bordered" />
-                  <button class="btn btn-sm btn-square">
-                    <i class="fas fa-search"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div> -->
+
 
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
