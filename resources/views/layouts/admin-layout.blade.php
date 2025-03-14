@@ -74,6 +74,7 @@
         <input id="my-drawer" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col">
             @yield('navbar')
+            
             @yield('content')
         </div>
         @include('admin.components.sidebar')
