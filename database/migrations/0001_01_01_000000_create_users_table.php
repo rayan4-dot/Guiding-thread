@@ -13,12 +13,24 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
+
             $table->string('name');
+            $table->string('username')->unique()->nullable(); 
             $table->string('email')->unique();
+            $table->string('phone')->nullable();
+
             $table->timestamp('email_verified_at')->nullable();
+
             $table->string('password');
-            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade'); 
-            $table->rememberToken();
+
+            $table->boolean('is_active')->default(true); 
+            $table->enum('role', ['user', 'admin', 'moderator'])->default('user');
+
+            $table->string('profile_image')->nullable(); // avatar
+            $table->text('bio')->nullable();
+
+            $table->rememberToken(); // si tu veux gérer "remember me"
+
             $table->timestamps();
         });
 
