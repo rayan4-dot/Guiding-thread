@@ -3,8 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Role;  // Import the Role model
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +14,28 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
 
-        User::factory()->create([
+        $adminRole = Role::create([
+            'role' => 'admin',
+        ]);
+
+        $userRole = Role::create([
+            'role' => 'user',
+        ]);
+
+
+        User::create([
+            'name' => 'Admin User',
+            'email' => 'kudo@gmail.com',
+            'password' => Hash::make('manzakin'),  
+            'role_id' => $adminRole->id,  
+        ]);
+
+        User::create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'password' => Hash::make('password123'), 
+            'role_id' => $userRole->id,  
         ]);
     }
 }
