@@ -1,15 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });
-
-
-
-
-Route::prefix('admin')->name('admin.')->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('Admin.dashboard');
     })->name('dashboard');
@@ -26,3 +20,44 @@ Route::prefix('admin')->name('admin.')->group(function () {
         return view('Admin.users');
     })->name('users');
 });
+
+Route::middleware(['auth', 'is_user'])->group(function () {
+
+    // Home page
+    Route::get('/home', function () {
+        return view('user.home');
+    })->name('user.home');
+
+    // Notifications page
+    Route::get('/notifications', function () {
+        return view('user.notifications');
+    })->name('user.notifications');
+
+    // Posts page
+    Route::get('/post', function () {
+        return view('user.post');
+    })->name('user.post');
+
+    // Profile page
+    Route::get('/profile', function () {
+        return view('user.profile');
+    })->name('user.profile');
+});
+
+
+
+
+
+Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
+
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
+
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');
