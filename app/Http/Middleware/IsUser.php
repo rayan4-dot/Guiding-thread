@@ -16,7 +16,7 @@ class IsUser
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->role && strtolower(Auth::user()->role->role) == 'user') {
+        if (Auth::check() && Auth::user()->role && strtolower(Auth::user()->role->role) === 'user') {
             return $next($request);
         }
         return response()->view('errors.access-denied');

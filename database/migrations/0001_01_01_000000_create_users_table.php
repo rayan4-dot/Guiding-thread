@@ -19,8 +19,10 @@ return new class extends Migration
 
             $table->text('bio')->nullable(); // Added for profile
 
+
             $table->boolean('is_active')->default(true);
             $table->unsignedBigInteger('role_id')->nullable(); // Explicitly define as unsignedBigInteger
+
             $table->timestamps();
         });
 
