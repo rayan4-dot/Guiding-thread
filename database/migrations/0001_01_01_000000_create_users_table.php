@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
 
             $table->string('name');
-            $table->string('username')->unique()->nullable(); 
             $table->string('profile_picture')->nullable();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
@@ -38,7 +37,6 @@ return new class extends Migration
                   ->references('id')
                   ->on('roles')
                   ->onDelete('cascade');
-            $table->rememberToken();
 
             $table->timestamps();
         });
