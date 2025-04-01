@@ -6,37 +6,22 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-
             $table->string('name');
             $table->string('profile_picture')->nullable();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
-
             $table->timestamp('email_verified_at')->nullable();
-
             $table->string('password');
 
-
-            $table->boolean('is_active')->default(true); 
-            $table->enum('role', ['user', 'admin', 'moderator'])->default('user');
-
-            $table->string('profile_image')->nullable(); // avatar
+            $table->text('bio')->nullable(); // Added for profile
 
 
-            $table->rememberToken(); // si tu veux gérer "remember me"
-
-
-            $table->unsignedBigInteger('role_id')
-                  ->references('id')
-                  ->on('roles')
-                  ->onDelete('cascade');
+            $table->boolean('is_active')->default(true);
+            $table->unsignedBigInteger('role_id')->nullable(); // Explicitly define as unsignedBigInteger
 
             $table->timestamps();
         });
@@ -57,9 +42,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
