@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfileController;
 
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
     Route::get('/dashboard', function () {
@@ -59,6 +60,13 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/update-password', function () {
         return view('user.update-password');
     })->name('user.update-password');
+
+    Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
+    Route::delete('/profile/picture', [ProfileController::class, 'removePicture'])->name('user.profile.remove-picture');
+    Route::delete('/profile/cover', [ProfileController::class, 'removeCoverPhoto'])->name('user.profile.remove-cover');
+    Route::get('/profile/{username}', [ProfileController::class, 'showPublicProfile'])->name('user.profile.public');
+
 });
 
 

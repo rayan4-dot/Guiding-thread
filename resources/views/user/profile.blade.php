@@ -3,6 +3,20 @@
 @section('title', 'Profile')
 
 @section('content')
+<!-- Display Success Message -->
+@if (session('success'))
+    <div class="max-w-screen-xl mx-auto px-4 py-3 bg-green-500 text-white rounded-md mb-4">
+        {{ session('success') }}
+    </div>
+@endif
+
+<!-- Display Error Message -->
+@if (session('error'))
+    <div class="max-w-screen-xl mx-auto px-4 py-3 bg-red-500 text-white rounded-md mb-4">
+        {{ session('error') }}
+    </div>
+@endif
+
 <!-- Fixed Header -->
 <header class="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-800">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -10,7 +24,7 @@
             <a href="/home" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
-            <h2 class="text-lg font-bold text-white">John Doe</h2>
+            <h2 class="text-lg font-bold text-white">{{ Auth::user()->name }}</h2>
         </div>
         <button class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black" aria-label="Settings">
             <i class="fa-solid fa-gear"></i>
@@ -19,27 +33,31 @@
 </header>
 
 <!-- Main Content -->
-<main class="max-w-screen-xl mx-auto" x-data="{ modalOpen: false }">
+<main class="max-w-screen-xl mx-auto" x-data="{ modalOpen: false, pictureModalOpen: false, coverModalOpen: false }">
     <!-- Profile Header -->
     <section class="relative mb-6">
         <!-- Cover Photo -->
         <div class="h-48 w-full bg-gradient-to-r from-gray-900 to-gray-800 overflow-hidden">
-            <img src="https://source.unsplash.com/random/1200x400?dark" alt="Cover Photo" class="w-full h-full object-cover opacity-80">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            <button @click="coverModalOpen = true" class="w-full h-full">
+                <img src="{{ Auth::user()->cover_photo ? Storage::url(Auth::user()->cover_photo) : 'https://source.unsplash.com/random/1200x400?dark' }}" alt="Cover Photo" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+            </button>
         </div>
         
         <!-- Profile Info -->
         <div class="relative px-4 pb-4">
             <!-- Profile Picture -->
             <div class="absolute -top-12 left-4 ring-4 ring-black rounded-full">
-                <img src="https://i.pravatar.cc/150?img=4" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-black">
+                <button @click="pictureModalOpen = true" class="focus:outline-none">
+                    <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-black hover:opacity-90 transition-opacity">
+                </button>
             </div>
             
             <!-- Profile Details -->
             <div class="flex justify-between items-center pt-16">
                 <div>
-                    <h1 class="text-2xl font-bold text-white">John Doe</h1>
-                    <p class="text-gray-400 text-sm">@johndoe</p>
+                    <h1 class="text-2xl font-bold text-white">{{ Auth::user()->name }}</h1>
+                    <p class="text-gray-400 text-sm">{{ '@' . Auth::user()->username }}</p>
                 </div>
                 <button @click="modalOpen = true" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
                     Edit profile
@@ -48,54 +66,45 @@
             
             <!-- Bio -->
             <div class="mt-3">
-                <p class="text-gray-300 text-sm">Web developer, UX designer, and coffee enthusiast. Building awesome experiences for the web.</p>
+                <p class="text-gray-300 text-sm">{{ Auth::user()->bio ?? 'No bio defined' }}</p>
             </div>
             
             <!-- Stats -->
             <div class="flex space-x-4 mt-3">
                 <div class="flex items-center space-x-1">
-                    <i class="fa-solid fa-location-dot text-gray-500"></i>
-                    <span class="text-gray-400 text-sm">San Francisco, CA</span>
-                </div>
-                <div class="flex items-center space-x-1">
-                    <i class="fa-solid fa-link text-gray-500"></i>
-                    <a href="#" class="text-blue-400 text-sm hover:underline">johndoe.com</a>
-                </div>
-                <div class="flex items-center space-x-1">
                     <i class="fa-regular fa-calendar text-gray-500"></i>
-                    <span class="text-gray-400 text-sm">Joined October 2020</span>
+                    <span class="text-gray-400 text-sm">Joined {{ Auth::user()->created_at->format('F Y') }}</span>
                 </div>
             </div>
         </div>
     </section>
     
     <!-- Friends Section -->
-    <section class="px-4 mb-6">
-        <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
-        <div class="grid grid-cols-6 gap-4 sm:grid-cols-8 md:grid-cols-10">
-            @foreach([
-                ['name' => 'Jane Smith', 'handle' => 'janesmith', 'avatar' => 'https://i.pravatar.cc/150?img=5'],
-                ['name' => 'Alice Brown', 'handle' => 'alice', 'avatar' => 'https://i.pravatar.cc/150?img=6'],
-                ['name' => 'Bob Wilson', 'handle' => 'bob', 'avatar' => 'https://i.pravatar.cc/150?img=7'],
-                ['name' => 'Mike Johnson', 'handle' => 'mikej', 'avatar' => 'https://i.pravatar.cc/150?img=8'],
-                ['name' => 'Sarah Lee', 'handle' => 'sarahlee', 'avatar' => 'https://i.pravatar.cc/150?img=9']
-            ] as $friend)
-                <a href="/profile/{{ $friend['handle'] }}" class="relative group flex flex-col items-center">
-                    <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-800 group-hover:ring-blue-500 transition-all">
-                        <img src="{{ $friend['avatar'] }}" alt="{{ $friend['name'] }}" class="w-full h-full object-cover">
-                    </div>
-                    <span class="mt-1 text-xs text-gray-400 text-center truncate w-full">{{ explode(' ', $friend['name'])[0] }}</span>
-                    <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-gray-800 w-max">
-                        {{ $friend['name'] }}
-                    </div>
-                </a>
-            @endforeach
+
+<section class="px-4 mb-6">
+    <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
+    <div class="grid grid-cols-6 gap-4 sm:grid-cols-8 md:grid-cols-10">
+        @forelse($friends as $friend)
+            <a href="/profile/{{ $friend->username }}" class="relative group flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-800 group-hover:ring-blue-500 transition-all">
+                    <img src="{{ $friend->profile_picture ? Storage::url($friend->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $friend->name }}" class="w-full h-full object-cover">
+                </div>
+                <span class="mt-1 text-xs text-gray-400 text-center truncate w-full">{{ explode(' ', $friend->name)[0] }}</span>
+                <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-gray-800 w-max">
+                    {{ $friend->name }}
+                </div>
+            </a>
+        @empty
+            <p class="text-gray-400 text-sm col-span-full">No friends found.</p>
+        @endforelse
+        @if($friends->count() > 0)
             <a href="/friends" class="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
                 <i class="fa-solid fa-ellipsis text-gray-400"></i>
                 <span class="mt-1 text-xs text-gray-400">More</span>
             </a>
-        </div>
-    </section>
+        @endif
+    </div>
+</section>
 
     <!-- Tabs -->
     <section class="border-b border-gray-800 mb-2">
@@ -103,12 +112,12 @@
             <button class="py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors" aria-selected="true">
                 Posts
             </button>
-            <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
+            <!-- <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
                 Media
             </button>
             <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
                 Likes
-            </button>
+            </button> -->
         </div>
     </section>
 
@@ -117,7 +126,7 @@
         @foreach([
             [
                 'id' => 'post1',
-                'user' => ['name' => 'John Doe', 'handle' => '@johndoe', 'avatar' => 'https://i.pravatar.cc/150?img=4'],
+                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
                 'time' => '2h',
                 'content' => 'Just finished a new web design project! Check it out. Really proud of how the UI turned out and the client was thrilled with the results.',
                 'image' => 'https://source.unsplash.com/random/600x400?webdesign',
@@ -127,7 +136,7 @@
             ],
             [
                 'id' => 'post2',
-                'user' => ['name' => 'John Doe', 'handle' => '@johndoe', 'avatar' => 'https://i.pravatar.cc/150?img=4'],
+                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
                 'time' => '1d',
                 'content' => 'Exploring the new features of Laravel 9. Excited to implement them in my projects! The new syntax is much cleaner and more intuitive.',
                 'image' => 'https://source.unsplash.com/random/600x400?coding',
@@ -137,7 +146,7 @@
             ],
             [
                 'id' => 'post3',
-                'user' => ['name' => 'John Doe', 'handle' => '@johndoe', 'avatar' => 'https://i.pravatar.cc/150?img=4'],
+                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
                 'time' => '3d',
                 'content' => 'Working on a new AI project that combines machine learning with accessible UI design. Stay tuned for updates!',
                 'image' => null,
@@ -223,35 +232,42 @@
                     </button>
                     <h3 class="text-xl font-bold text-white">Edit profile</h3>
                 </div>
-                <button @click="modalOpen = false" class="bg-white text-black font-bold px-5 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
+                <button type="submit" form="profileForm" class="bg-white text-black font-bold px-5 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
                     Save
                 </button>
             </div>
             
             <!-- Modal Body -->
             <div class="p-4">
-                <form id="profileForm">
-                    <!-- Cover and Profile Photo Section -->
+                <form id="profileForm" action="{{ route('user.profile.update') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    @method('PATCH')
+                    <!-- Cover Photo Section -->
                     <div class="relative mb-6">
-                        <!-- Cover Photo -->
-                        <div class="h-36 w-full bg-gradient-to-r from-gray-900 to-gray-800 rounded-lg overflow-hidden group relative">
-                            <img id="coverPreview" src="https://source.unsplash.com/random/1200x400?dark" class="w-full h-full object-cover opacity-80">
-                            <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <label for="coverPhoto" class="cursor-pointer bg-black/60 text-white p-2 rounded-full">
-                                    <i class="fa-solid fa-camera"></i>
-                                    <input type="file" id="coverPhoto" class="hidden" accept="image/*">
-                                </label>
+                        <h4 class="text-sm font-medium text-gray-400 mb-2">Cover Photo</h4>
+                        <div class="group">
+                            <div class="relative w-full h-32 rounded-lg overflow-hidden border border-gray-800">
+                                <img id="coverPreview" src="{{ Auth::user()->cover_photo ? Storage::url(Auth::user()->cover_photo) : 'https://source.unsplash.com/random/1200x400?dark' }}" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                    <label for="coverPhoto" class="cursor-pointer bg-black/60 text-white p-2 rounded-full">
+                                        <i class="fa-solid fa-camera"></i>
+                                        <input type="file" id="coverPhoto" name="cover_photo" class="hidden" accept="image/*">
+                                    </label>
+                                </div>
                             </div>
                         </div>
-                        
-                        <!-- Profile Picture -->
-                        <div class="absolute left-4 bottom-0 transform translate-y-1/2 group">
+                    </div>
+
+                    <!-- Profile Photo Section -->
+                    <div class="relative mb-6">
+                        <h4 class="text-sm font-medium text-gray-400 mb-2">Profile Picture</h4>
+                        <div class="group">
                             <div class="relative w-20 h-20 rounded-full overflow-hidden ring-4 ring-black">
-                                <img id="avatarPreview" src="https://i.pravatar.cc/150?img=4" class="w-full h-full object-cover">
+                                <img id="avatarPreview" src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" class="w-full h-full object-cover">
                                 <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                     <label for="profilePhoto" class="cursor-pointer bg-black/60 text-white p-2 rounded-full">
                                         <i class="fa-solid fa-camera"></i>
-                                        <input type="file" id="profilePhoto" class="hidden" accept="image/*">
+                                        <input type="file" id="profilePhoto" name="profile_picture" class="hidden" accept="image/*">
                                     </label>
                                 </div>
                             </div>
@@ -263,42 +279,105 @@
                         <!-- Name -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-400">Name</label>
-                            <input type="text" value="John Doe" maxlength="50" 
+                            <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}" maxlength="50" 
                                 class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            @error('name')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
                         </div>
                         
-                        <!-- Username/Handle -->
+                        <!-- Username (Editable) -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-400">Username</label>
                             <div class="relative">
                                 <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">@</span>
-                                <input type="text" value="johndoe" maxlength="15"
+                                <input type="text" name="username" value="{{ old('username', Auth::user()->username) }}" maxlength="50"
                                     class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 pl-7 focus:outline-none focus:ring-2 focus:ring-blue-500">
                             </div>
+                            @error('username')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
                         </div>
                         
                         <!-- Bio -->
                         <div class="space-y-2">
                             <label class="block text-sm font-medium text-gray-400">Bio</label>
-                            <textarea rows="3" maxlength="160" 
-                                class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">Web developer, UX designer, and coffee enthusiast. Building awesome experiences for the web.</textarea>
-                        </div>
-                        
-                        <!-- Location -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-400">Location</label>
-                            <input type="text" value="San Francisco, CA" maxlength="30"
-                                class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        </div>
-                        
-                        <!-- Website -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-400">Website</label>
-                            <input type="url" value="https://johndoe.com" 
-                                class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <textarea name="bio" rows="3" maxlength="160" 
+                                class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none">{{ old('bio', Auth::user()->bio) ?? '' }}</textarea>
+                            @error('bio')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Picture Modal -->
+    <div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black/70" 
+         x-show="pictureModalOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="relative bg-black w-full max-w-md rounded-xl border border-gray-800 shadow-lg" @click.away="pictureModalOpen = false">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+                <h3 class="text-xl font-bold text-white">Profile Picture</h3>
+                <button @click="pictureModalOpen = false" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-4 flex flex-col items-center">
+                <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" alt="Profile Picture" class="w-64 h-64 object-cover rounded-lg">
+                @if (Auth::user()->profile_picture)
+                    <form action="{{ route('user.profile.remove-picture') }}" method="POST" class="mt-4">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:text-red-700 transition-colors" onclick="return confirm('Are you sure you want to remove your profile picture?')">
+                            <i class="fa-solid fa-trash"></i> Remove Picture
+                        </button>
+                    </form>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Cover Photo Modal -->
+    <div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black/70" 
+         x-show="coverModalOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="relative bg-black w-full max-w-3xl rounded-xl border border-gray-800 shadow-lg" @click.away="coverModalOpen = false">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-800">
+                <h3 class="text-xl font-bold text-white">Cover Photo</h3>
+                <button @click="coverModalOpen = false" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-4 flex flex-col items-center">
+                <img src="{{ Auth::user()->cover_photo ? Storage::url(Auth::user()->cover_photo) : 'https://source.unsplash.com/random/1200x400?dark' }}" alt="Cover Photo" class="w-full h-96 object-cover rounded-lg">
+                @if (Auth::user()->cover_photo)
+                    <form action="{{ route('user.profile.remove-cover') }}" method="POST" class="mt-4">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-red-500 hover:text-red-700 transition-colors" onclick="return confirm('Are you sure you want to remove your cover photo?')">
+                            <i class="fa-solid fa-trash"></i> Remove Cover Photo
+                        </button>
+                    </form>
+                @endif
             </div>
         </div>
     </div>
@@ -312,7 +391,7 @@
 @section('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Image preview handlers
+    // Image preview handler for profile picture
     const handleImagePreview = (inputId, previewId) => {
         const input = document.getElementById(inputId);
         const preview = document.getElementById(previewId);

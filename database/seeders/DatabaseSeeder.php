@@ -11,32 +11,49 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Create or find roles
-        $adminRole = Role::firstOrCreate(
-            ['role' => 'admin'] // Revert to 'role' instead of 'name'
-        );
+        User::create([
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'username' => 'janesmith',
+            'password' => Hash::make('password'),
+            'bio' => 'Hi, I am Jane!',
+            'role_id' => 2,
+        ]);
 
-        $userRole = Role::firstOrCreate(
-            ['role' => 'user']
-        );
+        User::create([
+            'name' => 'Alice Brown',
+            'email' => 'alice@example.com',
+            'username' => 'alice',
+            'password' => Hash::make('password'),
+            'bio' => 'Hello there!',
+            'role_id' => 2,
+        ]);
 
-        // Create or find users
-        User::firstOrCreate(
-            ['email' => 'kudo@gmail.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('manzakin'),
-                'role_id' => $adminRole->id,
-            ]
-        );
+        User::create([
+            'name' => 'Bob Wilson',
+            'email' => 'bob@example.com',
+            'username' => 'bob',
+            'password' => Hash::make('password'),
+            'bio' => 'I love coding!',
+            'role_id' => 2,
+        ]);
 
-        User::firstOrCreate(
-            ['email' => 'test@example.com'],
-            [
-                'name' => 'Test User',
-                'password' => Hash::make('password123'),
-                'role_id' => $userRole->id,
-            ]
-        );
+        User::create([
+            'name' => 'Mike Johnson',
+            'email' => 'mike@example.com',
+            'username' => 'mikej',
+            'password' => Hash::make('password'),
+            'bio' => 'Nice to meet you!',
+            'role_id' => 2,
+        ]);
+
+        User::create([
+            'name' => 'Sarah Lee',
+            'email' => 'sarah@example.com',
+            'username' => 'sarahlee',
+            'password' => Hash::make('password'),
+            'bio' => 'I am Sarah!',
+            'role_id' => 2,
+        ]);
     }
 }
