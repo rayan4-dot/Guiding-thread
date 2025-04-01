@@ -3,39 +3,40 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Role;  // Import the Role model
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
+        // Create or find roles
+        $adminRole = Role::firstOrCreate(
+            ['role' => 'admin'] // Revert to 'role' instead of 'name'
+        );
 
-        $adminRole = Role::create([
-            'role' => 'admin',
-        ]);
+        $userRole = Role::firstOrCreate(
+            ['role' => 'user']
+        );
 
-        $userRole = Role::create([
-            'role' => 'user',
-        ]);
+        // Create or find users
+        User::firstOrCreate(
+            ['email' => 'kudo@gmail.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('manzakin'),
+                'role_id' => $adminRole->id,
+            ]
+        );
 
-
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'kudo@gmail.com',
-            'password' => Hash::make('manzakin'),  
-            'role_id' => $adminRole->id,  
-        ]);
-
-        User::create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => Hash::make('password123'), 
-            'role_id' => $userRole->id,  
-        ]);
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('password123'),
+                'role_id' => $userRole->id,
+            ]
+        );
     }
 }
