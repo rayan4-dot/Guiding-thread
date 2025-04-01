@@ -2,14 +2,15 @@
 
 namespace App\Repositories;
 
-use App\Repositories\Contracts\AuthRepositoryInterface;
+use Carbon\Carbon;
+use App\Models\Role;
 use App\Models\User;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+use App\Repositories\Contracts\AuthRepositoryInterface;
 
 class AuthRepository implements AuthRepositoryInterface
 {
@@ -19,6 +20,7 @@ class AuthRepository implements AuthRepositoryInterface
             'name'     => $data['name'],
             'email'    => $data['email'],
             'password' => Hash::make($data['password']),
+            'role_id'  => Role::where('role', 'user')->first()->id,
         ]);
 
         // Session::put('user_id', $user->id);

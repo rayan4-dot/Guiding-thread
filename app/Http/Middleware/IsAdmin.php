@@ -15,7 +15,7 @@ class IsAdmin
         if (!Auth::check()) {
             return redirect()->route('login');
         }
-        if (Auth::check() && Auth::user()->role && Auth::user()->role->role == 'admin') {
+        if (Auth::check() && Auth::user()->role && Auth::user()->role->role === 'admin') {
             return $next($request);
         }
         return response()->view('errors.user-denied');
