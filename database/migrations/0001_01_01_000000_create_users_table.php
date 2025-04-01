@@ -6,28 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('profile_picture')->nullable();
             $table->string('email')->unique();
             $table->string('phone')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
 
+            $table->text('bio')->nullable(); // Added for profile
 
             $table->boolean('is_active')->default(true);
-        
-            $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('cascade');
-        
-            $table->string('profile_image')->nullable(); // Avatar
-            $table->text('bio')->nullable();
-        
-            $table->rememberToken();
+            $table->unsignedBigInteger('role_id')->nullable(); // Explicitly define as unsignedBigInteger
             $table->timestamps();
         });
 
@@ -47,9 +40,6 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');

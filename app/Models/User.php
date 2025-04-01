@@ -12,9 +12,15 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'profile_picture',
         'email',
+        'phone',
         'password',
-        'role_id',  
+
+        'bio',
+        'is_active',
+        'role_id',
+
     ];
 
     protected $hidden = [
@@ -24,12 +30,13 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_active' => 'boolean',
+
     ];
 
     public function role()
     {
-        return $this->belongsTo(Role::class); // user belongs to one role
+        return $this->belongsTo(Role::class);
     }
-
-    
 }
+
