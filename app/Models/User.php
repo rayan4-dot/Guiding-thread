@@ -12,10 +12,12 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'username',
         'profile_picture',
         'email',
         'phone',
         'password',
+        'cover_photo', 
 
         'bio',
         'is_active',
@@ -40,5 +42,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
 
     }
+
+    public static function getNonAdminUsers()
+    {
+        return self::where('role_id', 2)
+                   ->where('id', '!=', auth()->id()) // Exclude the current user
+                   ->take(5) // Limit to 5 users for the "Friends" section
+                   ->get();
+    }
+
 }
 

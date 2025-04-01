@@ -12,20 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            $table->string('cover_photo')->nullable()->after('profile_picture');
 
         });
     }
 
-    
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->nullable();
-
+            $table->dropColumn('cover_photo');
         });
     }
 };
