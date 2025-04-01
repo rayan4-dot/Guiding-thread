@@ -31,7 +31,12 @@
                     </div>
                     <div class="badge badge-success">Online</div>
                 </div>
-                <button class="btn btn-outline btn-error btn-sm w-full text-red-600 hover:bg-red-50"><i class="fas fa-sign-out-alt mr-2"></i>Logout</button>
+                <form method="POST" action="{{ route('logout') }}" class="w-full">
+                    @csrf
+                    <button type="submit" class="btn btn-outline btn-error btn-sm w-full text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </button>
+                </form>
             </div>
         </div>
     </aside>
