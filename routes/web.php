@@ -28,6 +28,10 @@ Route::middleware(['auth', 'is_user'])->group(function () {
         return view('user.home');
     })->name('user.home');
 
+    Route::get('/explore', function () {
+        return view('user.explore');
+    })->name('user.explore');
+
     // Notifications page
     Route::get('/notifications', function () {
         return view('user.notifications');
@@ -42,6 +46,19 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/profile', function () {
         return view('user.profile');
     })->name('user.profile');
+
+    Route::get('/friends', function () {
+        return view('user.friends');
+    })->name('user.friends');
+
+
+    Route::get('/settings', function () {
+        return view('user.settings');
+    })->name('user.settings');
+
+    Route::get('/update-password', function () {
+        return view('user.update-password');
+    })->name('user.update-password');
 });
 
 
