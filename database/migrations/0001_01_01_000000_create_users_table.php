@@ -24,13 +24,21 @@ return new class extends Migration
 
             $table->string('password');
 
+
             $table->boolean('is_active')->default(true); 
             $table->enum('role', ['user', 'admin', 'moderator'])->default('user');
 
             $table->string('profile_image')->nullable(); // avatar
-            $table->text('bio')->nullable();
+
 
             $table->rememberToken(); // si tu veux gérer "remember me"
+
+
+            $table->unsignedBigInteger('role_id')
+                  ->references('id')
+                  ->on('roles')
+                  ->onDelete('cascade');
+            $table->rememberToken();
 
             $table->timestamps();
         });
