@@ -12,7 +12,8 @@ class ProfileController extends Controller
     public function show()
     {
         $user = Auth::user();
-        $friends = User::getNonAdminUsers(); // Fetch non-admin users (role_id = 2)
+        $friends = User::getNonAdminUsers();
+        $posts = $user->posts()->latest()->get(); 
 
         return view('user.profile', compact('user', 'friends'));
     }
@@ -103,6 +104,7 @@ class ProfileController extends Controller
 
             return redirect()->route('user.profile')->with('success', 'Profile picture removed successfully');
         } catch (\Exception $e) {
+            
             \Log::error('Profile picture removal failed: ' . $e->getMessage());
             return redirect()->route('user.profile')->with('error', 'Failed to remove profile picture: ' . $e->getMessage());
         }

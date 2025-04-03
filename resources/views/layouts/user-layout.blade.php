@@ -6,7 +6,13 @@
     <meta name="description" content="A modern social media platform interface">
     <title>X-Style Social - @yield('title')</title>
     
+    @production
+    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    @else
     <script src="https://cdn.tailwindcss.com"></script>
+    @endproduction
+    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         tailwind.config = {
@@ -37,7 +43,6 @@
             color: #e7e9ea;
         }
         
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -55,6 +60,11 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #3a3f45;
         }
+        
+        /* Fix for Alpine.js flash on load */
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
@@ -63,13 +73,11 @@
           onload="this.media='all'">
 </head>
 <body class="min-h-screen antialiased font-sans bg-black text-gray-100">
-
     <div class="flex max-w-7xl mx-auto" role="main">
-
         @include('admin.components.side-user')
         
         <main class="flex-1 max-w-[600px] border-r border-dark-border min-h-screen" aria-label="Main content">
-            @yield('content')   
+            @yield('content')
         </main>
         
         <aside class="hidden lg:block w-[350px] px-4 py-3 sticky top-0 h-screen custom-scrollbar" aria-label="Additional content">
