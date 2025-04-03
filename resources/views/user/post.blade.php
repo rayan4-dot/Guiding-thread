@@ -3,7 +3,6 @@
 @section('title', 'Post')
 
 @section('content')
-    <!-- Enhanced header with better accessibility and visual design -->
     <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-dark-border shadow-md">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
             <a href="{{ route('user.home') }}" 
@@ -19,9 +18,7 @@
         </div>
     </header>
 
-    <!-- Main content section with improved media handling -->
     <section class="max-w-3xl mx-auto" x-data="{ mediaModalOpen: false, selectedMedia: '', selectedMediaType: '' }">
-        <!-- Post article with enhanced styling -->
         <article class="p-4 border-b border-dark-border">
             <div class="flex gap-4">
                 <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0">
@@ -39,70 +36,82 @@
                         {{ $post->created_at->format('g:i A · M d, Y') }} · {{ $post->created_at->diffForHumans() }}
                     </time>
                     
-                    @if($post->content)
-                        <p class="mb-4 text-[15px] leading-relaxed">{{ $post->content }}</p>
+                    <?php 
+                        $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+                        $isYoutube = preg_match($youtubePattern, $post->content, $matches);
+                        $videoId = $isYoutube ? $matches[1] : null;
+                        $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
+                        // Remove extra newlines and whitespace
+                        $contentWithoutUrl = preg_replace('/\s+/', ' ', $contentWithoutUrl);
+                        $contentWithoutUrl = trim($contentWithoutUrl);
+                    ?>
+                    @if($contentWithoutUrl)
+                        <p class="mb-4 text-[15px] leading-relaxed">{{ nl2br(e($contentWithoutUrl)) }}</p>
+                    @endif
+                    @if($videoId && !$post->media_path && !$post->shared_link)
+                        <div class="mb-4 flex justify-center">
+                            <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                        </div>
                     @endif
                     
                     @if($post->media_path)
                         <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
                         @if(is_array($mediaItems) && count($mediaItems) > 0)
-                            <div class="grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : (count($mediaItems) >= 2 ? 'grid-cols-2' : '') }} gap-2 rounded-xl overflow-hidden mb-4">
-                                @foreach($mediaItems as $index => $media)
-                                    <div class="{{ count($mediaItems) === 3 && $index === 0 ? 'col-span-2' : '' }} {{ count($mediaItems) >= 5 && $index >= 4 ? 'hidden sm:block' : '' }}">
-                                        @if($media['type'] === 'image')
-                                            <div class="relative group overflow-hidden rounded-xl">
-                                                <img src="{{ $media['path'] }}" 
-                                                     alt="Post image" 
-                                                     class="w-full h-auto max-h-[500px] object-cover rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer" 
-                                                     @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
-                                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                    <button class="p-2 bg-black/50 rounded-full" @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
-                                                        <i class="fa-solid fa-expand text-white"></i>
-                                                    </button>
-                                                </div>
+                            <div class="grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : 'grid-cols-2' }} gap-2 rounded-xl overflow-hidden mb-4">
+                                @foreach($mediaItems as $media)
+                                    @if($media['type'] === 'image')
+                                        <div class="relative group overflow-hidden rounded-xl">
+                                            <img src="{{ $media['path'] }}" 
+                                                 alt="Post image" 
+                                                 class="w-full h-auto max-h-[500px] object-cover rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer" 
+                                                 @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
+                                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                <button class="p-2 bg-black/50 rounded-full" @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
+                                                    <i class="fa-solid fa-expand text-white"></i>
+                                                </button>
                                             </div>
-                                        @elseif($media['type'] === 'video')
-                                            <div class="relative group rounded-xl overflow-hidden">
-                                                <video controls class="w-full h-auto max-h-[500px] object-cover rounded-xl">
-                                                    <source src="{{ $media['path'] }}" type="video/mp4">
-                                                    Your browser does not support the video tag.
-                                                </video>
-                                                <div class="absolute inset-0 bg-transparent cursor-pointer" 
-                                                     @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'"></div>
-                                            </div>
-                                        @endif
-                                    </div>
+                                        </div>
+                                    @elseif($media['type'] === 'video')
+                                        <div class="relative group rounded-xl overflow-hidden">
+                                            <video controls class="w-full h-auto max-h-[500px] object-cover rounded-xl">
+                                                <source src="{{ $media['path'] }}" type="video/mp4">
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <div class="absolute inset-0 bg-transparent cursor-pointer" 
+                                                 @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'"></div>
+                                        </div>
+                                    @endif
                                 @endforeach
                             </div>
                         @endif
                     @elseif($post->shared_link)
-                        <a href="{{ $post->shared_link }}" target="_blank" rel="noopener noreferrer" 
-                           class="block p-4 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-4">
-                            <div class="text-primary hover:underline line-clamp-1">{{ $post->shared_link }}</div>
-                            <div class="text-gray-500 text-sm mt-1 line-clamp-1">{{ parse_url($post->shared_link, PHP_URL_HOST) }}</div>
-                        </a>
+                        <?php 
+                            $isYoutube = preg_match($youtubePattern, $post->shared_link, $matches);
+                            $videoId = $isYoutube ? $matches[1] : null;
+                        ?>
+                        @if($videoId)
+                            <div class="mb-4 flex justify-center">
+                                <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                            </div>
+                        @else
+                            <a href="{{ $post->shared_link }}" target="_blank" rel="noopener noreferrer" 
+                               class="block p-4 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-4">
+                                <div class="text-primary hover:underline line-clamp-1">{{ $post->shared_link }}</div>
+                                <div class="text-gray-500 text-sm mt-1 line-clamp-1">{{ parse_url($post->shared_link, PHP_URL_HOST) }}</div>
+                            </a>
+                        @endif
                     @endif
                     
-                    <!-- Post stats with timestamps -->
                     <div class="flex items-center gap-4 text-sm text-gray-500 py-3 border-t border-dark-border/50">
-                        <span><strong class="text-white">0</strong> Retweets</span>
-                        <span><strong class="text-white">0</strong> Quotes</span>
+                        <span><strong class="text-white">0</strong> Comments</span>
                         <span><strong class="text-white">0</strong> Likes</span>
-                        <span><strong class="text-white">0</strong> Bookmarks</span>
                     </div>
                     
-                    <!-- Enhanced interaction buttons -->
-                    <div class="flex justify-between items-center py-2 border-y border-dark-border/50 mt-1">
+                    <div class="flex justify-between items-center py-2 border-y border-dark-border/50 mt-1 max-w-[200px]">
                         <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group" 
                                 aria-label="Comments">
                             <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
                                 <i class="fa-regular fa-comment"></i>
-                            </div>
-                        </button>
-                        <button class="flex items-center gap-1 text-gray-500 hover:text-green-500 transition-colors group" 
-                                aria-label="Retweet">
-                            <div class="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
-                                <i class="fa-solid fa-retweet"></i>
                             </div>
                         </button>
                         <button class="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors group" 
@@ -111,24 +120,11 @@
                                 <i class="fa-regular fa-heart"></i>
                             </div>
                         </button>
-                        <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group" 
-                                aria-label="Bookmark">
-                            <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                                <i class="fa-regular fa-bookmark"></i>
-                            </div>
-                        </button>
-                        <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group" 
-                                aria-label="Share">
-                            <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                                <i class="fa-solid fa-share"></i>
-                            </div>
-                        </button>
                     </div>
                 </div>
             </div>
         </article>
 
-        <!-- Comment form section -->
         <div class="p-4 border-b border-dark-border">
             <form class="flex gap-3">
                 <div class="flex-shrink-0">
@@ -156,13 +152,11 @@
             </form>
         </div>
 
-        <!-- Comments Section with improved empty state -->
         <section class="p-4">
             <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
                 Comments
                 <span class="text-sm font-normal text-gray-500">(0)</span>
             </h2>
-            
             <div class="py-8 text-center">
                 <div class="w-12 h-12 bg-dark-hover/50 rounded-full flex items-center justify-center mx-auto mb-4">
                     <i class="fa-regular fa-comment-dots text-xl text-gray-400"></i>
@@ -172,7 +166,6 @@
             </div>
         </section>
 
-        <!-- Enhanced media modal with better UX -->
         <div class="fixed inset-0 z-50 overflow-auto bg-black/90 backdrop-blur-sm" 
              x-show="mediaModalOpen" 
              x-cloak 
