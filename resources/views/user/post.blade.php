@@ -5,7 +5,7 @@
 @section('content')
     <header class="sticky top-0 z-10 bg-black/90 backdrop-blur-md border-b border-dark-border shadow-md">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{{ route('user.home') }}" 
+            <a href="{{ url()->previous() }}" 
                class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                aria-label="Back to home">
                 <i class="fa-solid fa-arrow-left"></i>

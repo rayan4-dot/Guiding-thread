@@ -80,31 +80,30 @@
     </section>
     
     <!-- Friends Section -->
-
-<section class="px-4 mb-6">
-    <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
-    <div class="grid grid-cols-6 gap-4 sm:grid-cols-8 md:grid-cols-10">
-        @forelse($friends as $friend)
-            <a href="/profile/{{ $friend->username }}" class="relative group flex flex-col items-center">
-                <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-800 group-hover:ring-blue-500 transition-all">
-                    <img src="{{ $friend->profile_picture ? Storage::url($friend->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $friend->name }}" class="w-full h-full object-cover">
-                </div>
-                <span class="mt-1 text-xs text-gray-400 text-center truncate w-full">{{ explode(' ', $friend->name)[0] }}</span>
-                <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-gray-800 w-max">
-                    {{ $friend->name }}
-                </div>
-            </a>
-        @empty
-            <p class="text-gray-400 text-sm col-span-full">No friends found.</p>
-        @endforelse
-        @if($friends->count() > 0)
-            <a href="/friends" class="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
-                <i class="fa-solid fa-ellipsis text-gray-400"></i>
-                <span class="mt-1 text-xs text-gray-400">More</span>
-            </a>
-        @endif
-    </div>
-</section>
+    <section class="px-4 mb-6">
+        <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
+        <div class="grid grid-cols-6 gap-4 sm:grid-cols-8 md:grid-cols-10">
+            @forelse($friends as $friend)
+                <a href="/profile/{{ $friend->username }}" class="relative group flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-gray-800 group-hover:ring-blue-500 transition-all">
+                        <img src="{{ $friend->profile_picture ? Storage::url($friend->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $friend->name }}" class="w-full h-full object-cover">
+                    </div>
+                    <span class="mt-1 text-xs text-gray-400 text-center truncate w-full">{{ explode(' ', $friend->name)[0] }}</span>
+                    <div class="absolute -bottom-16 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-gray-800 w-max">
+                        {{ $friend->name }}
+                    </div>
+                </a>
+            @empty
+                <p class="text-gray-400 text-sm col-span-full">No friends found.</p>
+            @endforelse
+            @if($friends->count() > 0)
+                <a href="/friends" class="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-gray-800 hover:bg-gray-700 transition-colors">
+                    <i class="fa-solid fa-ellipsis text-gray-400"></i>
+                    <span class="mt-1 text-xs text-gray-400">More</span>
+                </a>
+            @endif
+        </div>
+    </section>
 
     <!-- Tabs -->
     <section class="border-b border-gray-800 mb-2">
@@ -112,88 +111,94 @@
             <button class="py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors" aria-selected="true">
                 Posts
             </button>
-            <!-- <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
-                Media
-            </button>
-            <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
-                Likes
-            </button> -->
         </div>
     </section>
 
     <!-- Posts Section -->
-    <section class="divide-y divide-gray-800">
-        @foreach([
-            [
-                'id' => 'post1',
-                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
-                'time' => '2h',
-                'content' => 'Just finished a new web design project! Check it out. Really proud of how the UI turned out and the client was thrilled with the results.',
-                'image' => 'https://source.unsplash.com/random/600x400?webdesign',
-                'comments' => 12,
-                'retweets' => 8,
-                'likes' => 50
-            ],
-            [
-                'id' => 'post2',
-                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
-                'time' => '1d',
-                'content' => 'Exploring the new features of Laravel 9. Excited to implement them in my projects! The new syntax is much cleaner and more intuitive.',
-                'image' => 'https://source.unsplash.com/random/600x400?coding',
-                'comments' => 20,
-                'retweets' => 15,
-                'likes' => 85
-            ],
-            [
-                'id' => 'post3',
-                'user' => ['name' => Auth::user()->name, 'handle' => '@' . Auth::user()->username, 'avatar' => Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png')],
-                'time' => '3d',
-                'content' => 'Working on a new AI project that combines machine learning with accessible UI design. Stay tuned for updates!',
-                'image' => null,
-                'comments' => 8,
-                'retweets' => 4,
-                'likes' => 32
-            ]
-        ] as $post)
-            <article class="px-4 py-4 hover:bg-gray-900/30 transition-colors" id="{{ $post['id'] }}">
+    <section class="divide-y divide-gray-800" id="posts-container">
+        @forelse($posts as $post)
+            <article class="px-4 py-4 hover:bg-gray-900/30 transition-colors" id="post-{{ $post->id }}">
                 <div class="flex gap-3">
-                    <a href="/profile/{{ $post['user']['handle'] }}" class="flex-shrink-0">
-                        <img src="{{ $post['user']['avatar'] }}" alt="{{ $post['user']['name'] }} profile" class="w-12 h-12 rounded-full hover:opacity-90 transition-opacity">
+                    <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0">
+                        <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $post->user->name }} profile" class="w-12 h-12 rounded-full hover:opacity-90 transition-opacity">
                     </a>
                     <div class="flex-1">
                         <div class="flex items-center gap-1.5">
-                            <a href="/profile/{{ $post['user']['handle'] }}" class="font-bold text-white hover:underline">{{ $post['user']['name'] }}</a>
-                            <span class="text-gray-500">{{ $post['user']['handle'] }}</span>
+                            <a href="/profile/{{ $post->user->username }}" class="font-bold text-white hover:underline">{{ $post->user->name }}</a>
+                            <span class="text-gray-500">{{ '@' . $post->user->username }}</span>
                             <span class="text-gray-500">·</span>
-                            <time class="text-gray-500 hover:underline">{{ $post['time'] }}</time>
+                            <time class="text-gray-500 hover:underline">{{ $post->created_at->diffForHumans() }}</time>
                             <button class="ml-auto text-gray-500 hover:text-white transition-colors">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
                         </div>
-                        <p class="text-white text-base leading-relaxed mt-2">{{ $post['content'] }}</p>
-                        @if($post['image'])
-                        <div class="mt-3 rounded-xl overflow-hidden border border-gray-800">
-                            <img src="{{ $post['image'] }}" alt="Post image" class="w-full object-cover hover:opacity-90 transition-opacity cursor-pointer">
-                        </div>
-                        @endif
+                        <a href="{{ route('post.show', $post->id) }}" class="block">
+                            <?php 
+                                $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+                                $isYoutube = preg_match($youtubePattern, $post->content, $matches);
+                                $videoId = $isYoutube ? $matches[1] : null;
+                                $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
+                                $contentWithoutUrl = preg_replace('/\s+/', ' ', $contentWithoutUrl);
+                                $contentWithoutUrl = trim($contentWithoutUrl);
+                            ?>
+                            @if($contentWithoutUrl)
+                                <p class="text-white text-base leading-relaxed mt-2">{{ nl2br(e($contentWithoutUrl)) }}</p>
+                            @endif
+                            @if($videoId && !$post->media_path && !$post->shared_link)
+                                <div class="mt-3 flex justify-center">
+                                    <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            @endif
+                            @if($post->media_path)
+                                <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
+                                @if(is_array($mediaItems) && count($mediaItems) > 0)
+                                    <div class="mt-3 grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : 'grid-cols-2' }} gap-2 rounded-xl overflow-hidden border border-gray-800">
+                                        @foreach($mediaItems as $media)
+                                            @if($media['type'] === 'image')
+                                                <img src="{{ $media['path'] }}" alt="Post image" class="w-full h-auto max-h-[500px] object-cover hover:opacity-90 transition-opacity cursor-pointer">
+                                            @elseif($media['type'] === 'video')
+                                                <video controls class="w-full h-auto max-h-[500px] object-cover">
+                                                    <source src="{{ $media['path'] }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @elseif($post->shared_link)
+                                <?php 
+                                    $isYoutube = preg_match($youtubePattern, $post->shared_link, $matches);
+                                    $videoId = $isYoutube ? $matches[1] : null;
+                                ?>
+                                @if($videoId)
+                                    <div class="mt-3 flex justify-center">
+                                        <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                    </div>
+                                @else
+                                    <div class="mt-3 p-3 border border-gray-800 rounded-xl hover:bg-gray-900/30">
+                                        <span class="text-blue-500 hover:underline line-clamp-1">{{ $post->shared_link }}</span>
+                                    </div>
+                                @endif
+                            @endif
+                        </a>
                         <div class="flex justify-between mt-3 text-gray-500">
                             <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
                                 <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
                                     <i class="fa-regular fa-comment"></i>
                                 </div>
-                                <span>{{ $post['comments'] }}</span>
+                                <span>0</span>
                             </button>
                             <button class="flex items-center gap-2 hover:text-green-500 transition-colors group" aria-label="Retweet">
                                 <div class="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
                                     <i class="fa-solid fa-retweet"></i>
                                 </div>
-                                <span>{{ $post['retweets'] }}</span>
+                                <span>0</span>
                             </button>
                             <button class="flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like">
                                 <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
                                     <i class="fa-regular fa-heart"></i>
                                 </div>
-                                <span>{{ $post['likes'] }}</span>
+                                <span>0</span>
                             </button>
                             <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Share">
                                 <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
@@ -204,15 +209,20 @@
                     </div>
                 </div>
             </article>
-        @endforeach
+        @empty
+            <div class="px-4 py-6 text-center text-gray-400">
+                <p class="text-lg font-medium">No posts yet</p>
+                <p class="mt-2">Share your thoughts with the world!</p>
+            </div>
+        @endforelse
     </section>
-    
-    <!-- Load More -->
-    <div class="flex justify-center py-6">
-        <button class="bg-transparent border border-gray-800 text-blue-500 font-bold px-6 py-3 rounded-full hover:bg-gray-900 transition-colors text-sm">
-            Load more
-        </button>
-    </div>
+
+    <!-- Pagination -->
+    @if($posts->hasPages())
+        <div class="flex justify-center py-6">
+            {{ $posts->links('vendor.pagination.tailwind') }}
+        </div>
+    @endif
 
     <!-- Edit Profile Modal -->
     <div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black/70" 
@@ -388,25 +398,98 @@
     <!-- Right sidebar content remains unchanged -->
 @endsection
 
-@section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Image preview handler for profile picture
-    const handleImagePreview = (inputId, previewId) => {
-        const input = document.getElementById(inputId);
-        const preview = document.getElementById(previewId);
-        
-        input.addEventListener('change', function() {
-            if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = (e) => preview.src = e.target.result;
-                reader.readAsDataURL(this.files[0]);
-            }
-        });
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof Alpine === 'undefined') {
+            console.error('Alpine.js is not loaded!');
+            return;
+        }
 
-    handleImagePreview('profilePhoto', 'avatarPreview');
-    handleImagePreview('coverPhoto', 'coverPreview');
-});
+        window.appendNewPost = (post) => {
+            console.log('Appending post:', post);
+            const container = document.getElementById('posts-container');
+            if (!container) {
+                console.error('Posts container not found!');
+                return;
+            }
+
+            const youtubePattern = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/embed\/)([^"&?\/\s]{11})/i;
+            const isYoutubeContent = youtubePattern.test(post.content);
+            const videoIdContent = isYoutubeContent ? post.content.match(youtubePattern)[1] : null;
+            const isYoutubeShared = post.shared_link && youtubePattern.test(post.shared_link);
+            const videoIdShared = isYoutubeShared ? post.shared_link.match(youtubePattern)[1] : null;
+            const contentWithoutUrl = videoIdContent ? post.content.replace(youtubePattern, '').trim() : post.content;
+
+            const mediaHtml = Array.isArray(post.media_path) && post.media_path.length > 0 ? `
+                <div class="grid ${post.media_path.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2 rounded-xl overflow-hidden mb-3">
+                    ${post.media_path.map(media => `
+                        ${media.type === 'image' ? `
+                            <img src="${media.path}" alt="Post image" class="w-full h-auto max-h-[500px] object-cover rounded-xl hover:brightness-90 transition-all duration-200 cursor-pointer" data-media="${media.path}" data-type="image">
+                        ` : `
+                            <video controls class="w-full h-auto max-h-[500px] object-cover rounded-xl">
+                                <source src="${media.path}" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        `}
+                    `).join('')}
+                </div>
+            ` : videoIdContent && !post.media_path && !post.shared_link ? `
+                <div class="mb-3 flex justify-center">
+                    <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/${videoIdContent}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                </div>
+            ` : post.shared_link ? `
+                ${videoIdShared ? `
+                    <div class="mb-3 flex justify-center">
+                        <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/${videoIdShared}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                    </div>
+                ` : `
+                    <div class="p-3 border border-gray-800 rounded-xl hover:bg-gray-900/30 transition-all mb-3">
+                        <span class="text-blue-500 hover:underline line-clamp-1">${post.shared_link}</span>
+                    </div>
+                `}
+            ` : '';
+
+            const postHtml = `
+                <article class="p-4 border-b border-gray-800" id="post-${post.id}">
+                    <div class="flex gap-4">
+                        <a href="/profile/${post.user.username}" class="flex-shrink-0">
+                            <img src="${post.user.profile_picture}" alt="${post.user.name}" class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
+                        </a>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1 flex-wrap">
+                                <a href="/profile/${post.user.username}" class="font-bold hover:underline cursor-pointer">${post.user.name}</a>
+                                <span class="text-gray-500">@${post.user.username}</span>
+                                <span class="text-gray-500">·</span>
+                                <time class="text-gray-500 hover:underline cursor-pointer">${post.created_at}</time>
+                                <button class="ml-auto text-gray-500 hover:text-blue-500 p-1 rounded-full hover:bg-blue-500/10 transition-all duration-200">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+                            </div>
+                            <div class="block">
+                                ${contentWithoutUrl ? `<p class="mb-3 text-white text-base leading-relaxed">${contentWithoutUrl.replace(/\n/g, '<br>')}</p>` : ''}
+                                ${mediaHtml}
+                                <a href="/post/${post.id}" class="block text-blue-500 hover:underline text-sm mt-2">View Post</a>
+                                ${contentWithoutUrl ? `<a href="/post/${post.id}" class="block text-white hover:underline text-base leading-relaxed mt-2">${contentWithoutUrl.replace(/\n/g, '<br>')}</a>` : ''}
+                            </div>
+                            <div class="flex justify-start gap-8">
+                                <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
+                                    <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
+                                        <i class="fa-regular fa-comment"></i>
+                                    </div>
+                                    <span>0</span>
+                                </button>
+                                <button class="flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like">
+                                    <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                                        <i class="fa-regular fa-heart"></i>
+                                    </div>
+                                    <span>0</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            `;
+            container.insertAdjacentHTML('afterbegin', postHtml);
+        };
+    });
 </script>
-@endsection

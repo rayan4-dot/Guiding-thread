@@ -1,4 +1,4 @@
-<aside class="w-20 md:w-64 h-screen sticky top-0 flex flex-col p-4 space-y-4 bg-black text-white border-r border-dark-border z-20" x-data="postModal" @keydown.escape="postModalOpen = false">    
+<aside class="w-20 md:w-64 h-screen sticky top-0 flex flex-col p-4 space-y-4 bg-black text-white border-r border-dark-border z-20" x-data="postModal" @keydown.escape="postModalOpen = false">
     <!-- Logo -->
     <div class="p-2 mb-6">
         <a href="{{ route('user.home') }}" class="flex items-center justify-center md:justify-start">
@@ -119,169 +119,187 @@
     </div>
 
     <script>
-        function toggleDropdown() {
-            const dropdown = document.getElementById('dropdownMenu');
-            dropdown.classList.toggle('hidden');
+    function toggleDropdown() {
+        const dropdown = document.getElementById('dropdownMenu');
+        dropdown.classList.toggle('hidden');
+    }
+
+    document.addEventListener('click', (event) => {
+        const dropdown = document.getElementById('dropdownMenu');
+        const profile = document.querySelector('.profile-container');
+        if (dropdown && !dropdown.contains(event.target) && (!profile || !profile.contains(event.target))) {
+            dropdown.classList.add('hidden');
         }
+    });
 
-        document.addEventListener('click', (event) => {
-            const dropdown = document.getElementById('dropdownMenu');
-            const profile = document.querySelector('.profile-container');
-            if (dropdown && !dropdown.contains(event.target) && (!profile || !profile.contains(event.target))) {
-                dropdown.classList.add('hidden');
-            }
-        });
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('postModal', () => ({
+            postModalOpen: false,
+            initModal() {
+                const form = document.getElementById('postForm');
+                const submitBtn = document.getElementById('submitPost');
+                const contentInput = form.querySelector('textarea[name="content"]');
+                const mediaInput = form.querySelector('input[name="media[]"]');
+                const previewContainer = document.getElementById('mediaPreviewContainer');
+                const clearMediaBtn = document.getElementById('clearMedia');
 
-        document.addEventListener('alpine:init', () => {
-            Alpine.data('postModal', () => ({
-                postModalOpen: false,
-                initModal() {
-                    const form = document.getElementById('postForm');
-                    const submitBtn = document.getElementById('submitPost');
-                    const contentInput = form.querySelector('textarea[name="content"]');
-                    const mediaInput = form.querySelector('input[name="media[]"]');
-                    const previewContainer = document.getElementById('mediaPreviewContainer');
-                    const clearMediaBtn = document.getElementById('clearMedia');
+                const updateSubmitButton = () => {
+                    const hasContent = contentInput.value.trim().length > 0;
+                    const hasMedia = mediaInput.files && mediaInput.files.length > 0;
+                    submitBtn.disabled = !(hasContent || hasMedia);
+                };
 
-                    const updateSubmitButton = () => {
-                        const hasContent = contentInput.value.trim().length > 0;
-                        const hasMedia = mediaInput.files && mediaInput.files.length > 0;
-                        submitBtn.disabled = !(hasContent || hasMedia);
-                    };
+                contentInput.addEventListener('input', updateSubmitButton);
 
-                    contentInput.addEventListener('input', updateSubmitButton);
-                    mediaInput.addEventListener('change', () => {
-                        previewContainer.innerHTML = '';
-                        if (mediaInput.files && mediaInput.files.length > 0) {
-                            if (mediaInput.files.length > 4) {
-                                alert('Max 4 files allowed.');
-                                mediaInput.value = '';
-                                return;
-                            }
-                            previewContainer.classList.remove('hidden');
-                            clearMediaBtn.classList.remove('hidden');
-                            Array.from(mediaInput.files).forEach(file => {
-                                const fileType = file.type;
-                                const previewDiv = document.createElement('div');
-                                previewDiv.className = 'relative rounded-xl overflow-hidden bg-black/40 mb-2';
-                                if (fileType.startsWith('image/')) {
-                                    const img = document.createElement('img');
-                                    img.className = 'max-h-32 w-full object-contain';
-                                    img.alt = 'Preview';
-                                    const reader = new FileReader();
-                                    reader.onload = (e) => img.src = e.target.result;
-                                    reader.readAsDataURL(file);
-                                    previewDiv.appendChild(img);
-                                } else if (fileType.startsWith('video/')) {
-                                    const video = document.createElement('video');
-                                    video.className = 'max-h-32 w-full object-contain';
-                                    video.controls = true;
-                                    video.src = URL.createObjectURL(file);
-                                    previewDiv.appendChild(video);
-                                }
-                                const filenameP = document.createElement('p');
-                                filenameP.className = 'text-xs text-gray-500 mt-1 truncate';
-                                filenameP.textContent = file.name;
-                                previewDiv.appendChild(filenameP);
-                                previewContainer.appendChild(previewDiv);
-                            });
-                        } else {
-                            previewContainer.classList.add('hidden');
-                            clearMediaBtn.classList.add('hidden');
+                mediaInput.addEventListener('change', () => {
+                    console.log('Media input changed, files:', mediaInput.files);
+                    previewContainer.innerHTML = '';
+                    if (mediaInput.files && mediaInput.files.length > 0) {
+                        if (mediaInput.files.length > 4) {
+                            alert('Max 4 files allowed.');
+                            mediaInput.value = '';
+                            return;
                         }
-                        updateSubmitButton();
-                    });
-
-                    clearMediaBtn.addEventListener('click', () => {
-                        mediaInput.value = '';
-                        previewContainer.innerHTML = '';
+                        previewContainer.classList.remove('hidden');
+                        clearMediaBtn.classList.remove('hidden');
+                        Array.from(mediaInput.files).forEach(file => {
+                            const fileType = file.type;
+                            console.log('Processing file:', file.name, fileType);
+                            const previewDiv = document.createElement('div');
+                            previewDiv.className = 'relative rounded-xl overflow-hidden bg-black/40 mb-2';
+                            if (fileType.startsWith('image/')) {
+                                const img = document.createElement('img');
+                                img.className = 'max-h-32 w-full object-contain';
+                                img.alt = 'Preview';
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    console.log('Image loaded for:', file.name);
+                                    img.src = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                                previewDiv.appendChild(img);
+                            } else if (fileType.startsWith('video/')) {
+                                const video = document.createElement('video');
+                                video.className = 'max-h-32 w-full object-contain';
+                                video.controls = true;
+                                video.src = URL.createObjectURL(file);
+                                console.log('Video URL set for:', file.name);
+                                previewDiv.appendChild(video);
+                            }
+                            const filenameP = document.createElement('p');
+                            filenameP.className = 'text-xs text-gray-500 mt-1 truncate';
+                            filenameP.textContent = file.name;
+                            previewDiv.appendChild(filenameP); // Fixed: append filenameP, not previewDiv
+                            previewContainer.appendChild(previewDiv);
+                        });
+                    } else {
                         previewContainer.classList.add('hidden');
                         clearMediaBtn.classList.add('hidden');
-                        updateSubmitButton();
-                    });
+                    }
+                    updateSubmitButton();
+                });
 
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        submitBtn.disabled = true;
+                clearMediaBtn.addEventListener('click', () => {
+                    mediaInput.value = '';
+                    previewContainer.innerHTML = '';
+                    previewContainer.classList.add('hidden');
+                    clearMediaBtn.classList.add('hidden');
+                    updateSubmitButton();
+                });
 
-                        const errorSpans = ['content', 'media'].map(field => document.getElementById(`${field}-error`));
-                        errorSpans.forEach(span => span && (span.classList.add('hidden'), span.textContent = ''));
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+                    console.log('Form submitting from:', window.location.pathname);
 
-                        try {
-                            const formData = new FormData(form);
-                            console.log('Form data:', Array.from(formData.entries()));
-                            const response = await fetch('{{ route('posts.store') }}', {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Accept': 'application/json'
+                    const errorSpans = ['content', 'media'].map(field => document.getElementById(`${field}-error`));
+                    errorSpans.forEach(span => span && (span.classList.add('hidden'), span.textContent = ''));
+
+                    try {
+                        const formData = new FormData(form);
+                        console.log('Form data:', Array.from(formData.entries()));
+                        const response = await fetch('{{ route('posts.store') }}', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        console.log('Response status:', response.status);
+                        const text = await response.text();
+                        console.log('Response text:', text);
+
+                        if (!response.ok) {
+                            try {
+                                const error = JSON.parse(text);
+                                throw error;
+                            } catch {
+                                throw new Error('Non-JSON error: ' + text);
+                            }
+                        }
+
+                        const data = JSON.parse(text);
+                        console.log('Parsed response:', data);
+
+                        if (data.success) {
+                            form.reset();
+                            previewContainer.innerHTML = '';
+                            previewContainer.classList.add('hidden');
+                            clearMediaBtn.classList.add('hidden');
+                            this.postModalOpen = false;
+
+                            console.log('Calling appendNewPost with:', data.post);
+                            if (typeof window.appendNewPost === 'function') {
+                                window.appendNewPost(data.post);
+                            } else {
+                                console.log('appendNewPost not found on this page');
+                            }
+
+                            showToast('Post created successfully!', data.post.id);
+                        } else if (data.errors) {
+                            Object.keys(data.errors).forEach(field => {
+                                const errorSpan = document.getElementById(`${field}-error`);
+                                if (errorSpan) {
+                                    errorSpan.textContent = data.errors[field][0];
+                                    errorSpan.classList.remove('hidden');
                                 }
                             });
-
-                            console.log('Response status:', response.status);
-                            const text = await response.text();
-                            console.log('Response text:', text);
-
-                            if (!response.ok) {
-                                try {
-                                    const error = JSON.parse(text);
-                                    throw error;
-                                } catch {
-                                    throw new Error('Non-JSON error: ' + text);
-                                }
-                            }
-
-                            const data = JSON.parse(text);
-                            console.log('Response data:', data);
-
-                            if (data.success) {
-                                window.appendNewPost(data.post);
-                                form.reset();
-                                previewContainer.innerHTML = '';
-                                previewContainer.classList.add('hidden');
-                                clearMediaBtn.classList.add('hidden');
-                                this.postModalOpen = false;
-                                showToast('Post created successfully!');
-                            } else if (data.errors) {
-                                Object.keys(data.errors).forEach(field => {
-                                    const errorSpan = document.getElementById(`${field}-error`);
-                                    if (errorSpan) {
-                                        errorSpan.textContent = data.errors[field][0];
-                                        errorSpan.classList.remove('hidden');
-                                    }
-                                });
-                            }
-                        } catch (error) {
-                            console.error('Submission error:', error);
-                            if (error.errors) {
-                                Object.keys(error.errors).forEach(field => {
-                                    const errorSpan = document.getElementById(`${field}-error`);
-                                    if (errorSpan) {
-                                        errorSpan.textContent = error.errors[field][0];
-                                        errorSpan.classList.remove('hidden');
-                                    }
-                                });
-                            } else {
-                                console.error('Detailed error:', error.message);
-                                alert('Submission failed: ' + error.message);
-                            }
-                        } finally {
-                            submitBtn.disabled = false;
                         }
-                    });
+                    } catch (error) {
+                        console.error('Submission error:', error);
+                        if (error.errors) {
+                            Object.keys(error.errors).forEach(field => {
+                                const errorSpan = document.getElementById(`${field}-error`);
+                                if (errorSpan) {
+                                    errorSpan.textContent = error.errors[field][0];
+                                    errorSpan.classList.remove('hidden');
+                                }
+                            });
+                        } else {
+                            console.error('Detailed error:', error.message);
+                            alert('Submission failed: ' + error.message);
+                        }
+                    } finally {
+                        submitBtn.disabled = false;
+                    }
+                });
 
-                    updateSubmitButton();
-                }
-            }));
-        });
+                updateSubmitButton();
+            }
+        }));
+    });
 
-        function showToast(message) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            toast.textContent = message;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+    function showToast(message, postId) {
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
+        toast.innerHTML = `
+            ${message}
+            <a href="/posts/${postId}" class="text-white underline hover:text-gray-200">View</a>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
     </script>
 </aside>
