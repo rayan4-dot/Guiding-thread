@@ -1,21 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('fetch.js loaded and running!');
     if (typeof Alpine === 'undefined') {
         console.error('Alpine.js is not loaded!');
         return;
     }
 
-    // Get the current user ID from a global variable (set in the Blade template or layout)
     const currentUserId = window.currentUserId || null;
 
-    // Dropdown toggle for user sidebar
     window.toggleDropdown = () => {
         const dropdown = document.getElementById('dropdownMenu');
-        if (dropdown) {
-            dropdown.classList.toggle('hidden');
-        }
+        if (dropdown) dropdown.classList.toggle('hidden');
     };
 
-    // Close dropdown when clicking outside
     document.addEventListener('click', (event) => {
         const dropdown = document.getElementById('dropdownMenu');
         const profile = document.querySelector('.profile-container');
@@ -24,61 +20,54 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Delete Post Function (used in all three pages)
+    console.log('Setting window.deletePost');
     window.deletePost = async (postId, redirectAfterDelete = false) => {
-        if (confirm('Are you sure you want to delete this post?')) {
-            try {
-                const response = await fetch(`/post/${postId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json',
-                    },
-                });
+        console.log('deletePost called with ID:', postId);
+        try {
+            const response = await fetch(`/post/${postId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json',
+                },
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (data.success) {
-                    const postElement = document.getElementById(`post-${postId}`);
-                    if (postElement) {
-                        postElement.remove();
-                    }
+            if (data.success) {
+                const postElement = document.getElementById(`post-${postId}`);
+                console.log('Removing post element:', postElement);
+                if (postElement) postElement.remove();
 
-                    // Show success toast notification
-                    const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
-                    toast.innerHTML = '<i class="fa-solid fa-check-circle text-green-500 mr-2"></i> Post deleted successfully';
-                    document.body.appendChild(toast);
-
-                    // Handle redirect (used in post.blade.php)
-                    setTimeout(() => {
-                        toast.remove();
-                        if (redirectAfterDelete) {
-                            window.location.href = '/home';
-                        }
-                    }, 2000);
-                } else {
-                    console.error('Failed to delete post:', data.message);
-                    // Show error toast
-                    const toast = document.createElement('div');
-                    toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
-                    toast.innerHTML = '<i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i> Failed to delete post';
-                    document.body.appendChild(toast);
-                    setTimeout(() => toast.remove(), 3000);
+                if (redirectAfterDelete) {
+                    console.log('Redirecting to /home');
+                    window.location.href = '/home';
+                    return; // Exit early to avoid toast on redirect
                 }
-            } catch (error) {
-                console.error('Error during deletion:', error);
-                // Show error toast
+
                 const toast = document.createElement('div');
                 toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
-                toast.innerHTML = '<i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i> Error deleting post';
+                toast.innerHTML = '<i class="fa-solid fa-check-circle text-green-500 mr-2"></i> Post deleted successfully';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 2000);
+            } else {
+                console.error('Failed to delete post:', data.message);
+                const toast = document.createElement('div');
+                toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
+                toast.innerHTML = '<i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i> Failed to delete post';
                 document.body.appendChild(toast);
                 setTimeout(() => toast.remove(), 3000);
             }
+        } catch (error) {
+            console.error('Error during deletion:', error);
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
+            toast.innerHTML = '<i class="fa-solid fa-exclamation-circle text-red-500 mr-2"></i> Error deleting post';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         }
     };
 
-    // Append New Post Function (used in home.blade.php and profile.blade.php)
     window.appendNewPost = (post, isOwnerOverride = null) => {
         console.log('Appending post:', post);
         const container = document.getElementById('posts-container');
@@ -87,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Determine if the post belongs to the current user
         const isOwner = isOwnerOverride !== null ? isOwnerOverride : (post.user && post.user.id ? Number(post.user.id) === currentUserId : true);
 
         const youtubePattern = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/embed\/)([^"&?\/\s]{11})/i;
@@ -195,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         container.insertAdjacentHTML('afterbegin', postHtml);
 
-        // Add event listeners for media modal (used in home.blade.php)
         const newPost = document.getElementById(`post-${post.id}`);
         if (newPost) {
             newPost.querySelectorAll('img[data-media]').forEach(img => {
@@ -210,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Show Toast Function (used in post creation modal)
     window.showToast = (message, postId) => {
         const toast = document.createElement('div');
         toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2';
@@ -223,7 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
-// Post Creation Modal Logic (from side-user.blade.php)
 document.addEventListener('alpine:init', () => {
     Alpine.data('postModal', () => ({
         postModalOpen: false,

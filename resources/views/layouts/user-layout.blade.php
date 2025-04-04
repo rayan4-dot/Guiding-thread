@@ -5,17 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="A modern social media platform interface">
     <title>X-Style Social - @yield('title')</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     @production
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/fetch.js') }}" defer></script>
+
 
     @else
     <script src="https://cdn.tailwindcss.com"></script>
+
+
     @endproduction
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{{ asset('js/fetch.js') }}" defer></script> <!-- Include fetch.js here -->
+    
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -87,4 +92,6 @@
         </aside>
     </div>
 </body>
+
+<script src="{{ asset('js/fetch.js') }}" defer></script>
 </html>

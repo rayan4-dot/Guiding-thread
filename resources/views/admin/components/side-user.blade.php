@@ -117,4 +117,9 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('js/fetch.js') }}" defer></script>
 </aside>
+
+
+

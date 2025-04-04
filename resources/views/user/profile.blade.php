@@ -3,14 +3,12 @@
 @section('title', 'Profile')
 
 @section('content')
-<!-- Display Success Message -->
+<!-- Messages unchanged -->
 @if (session('success'))
     <div class="max-w-screen-xl mx-auto px-4 py-3 bg-green-500 text-white rounded-md mb-4">
         {{ session('success') }}
     </div>
 @endif
-
-<!-- Display Error Message -->
 @if (session('error'))
     <div class="max-w-screen-xl mx-auto px-4 py-3 bg-red-500 text-white rounded-md mb-4">
         {{ session('error') }}
@@ -21,7 +19,7 @@
 <header class="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-800">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-            <a href="/home" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
+            <a href="javascript:history.back()" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <h2 class="text-lg font-bold text-white">{{ Auth::user()->name }}</h2>
@@ -39,21 +37,18 @@
         <!-- Cover Photo -->
         <div class="h-48 w-full bg-gradient-to-r from-gray-900 to-gray-800 overflow-hidden sm:h-56 md:h-64">
             <button @click="coverModalOpen = true" class="w-full h-full">
-                <img src="{{ Auth::user()->cover_photo ? Storage::url(Auth::user()->cover_photo) : 'https://source.unsplash.com/random/1200x400?dark' }}" alt="Cover Photo" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
+                <img id="coverPhoto" src="{{ Auth::user()->cover_photo ? Storage::url(Auth::user()->cover_photo) : 'https://source.unsplash.com/random/1200x400?dark' }}" alt="Cover Photo" class="w-full h-full object-cover opacity-80 hover:opacity-100 transition-opacity">
                 <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </button>
         </div>
         
-        <!-- Profile Info -->
+        <!-- Profile Info unchanged -->
         <div class="relative px-4 pb-4">
-            <!-- Profile Picture -->
             <div class="absolute -top-16 left-4 ring-4 ring-black rounded-full sm:-top-20 md:-top-24">
                 <button @click="pictureModalOpen = true" class="focus:outline-none">
                     <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-black hover:opacity-90 transition-opacity sm:w-28 sm:h-28 md:w-32 md:h-32">
                 </button>
             </div>
-            
-            <!-- Profile Details -->
             <div class="flex justify-between items-center pt-16 sm:pt-20 md:pt-24">
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ Auth::user()->name }}</h1>
@@ -63,13 +58,9 @@
                     Edit profile
                 </button>
             </div>
-            
-            <!-- Bio -->
             <div class="mt-3">
                 <p class="text-gray-300 text-sm">{{ Auth::user()->bio ?? 'No bio defined' }}</p>
             </div>
-            
-            <!-- Stats -->
             <div class="flex space-x-4 mt-3">
                 <div class="flex items-center space-x-1">
                     <i class="fa-regular fa-calendar text-gray-500"></i>
@@ -79,7 +70,7 @@
         </div>
     </section>
     
-    <!-- Friends Section -->
+    <!-- Friends Section unchanged -->
     <section class="px-4 mb-6">
         <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
         <div class="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8">
@@ -105,7 +96,7 @@
         </div>
     </section>
 
-    <!-- Tabs -->
+    <!-- Tabs unchanged -->
     <section class="border-b border-gray-800 mb-2">
         <div class="flex px-4">
             <button class="py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors" aria-selected="true">
@@ -194,7 +185,6 @@
                                     </div>
                                 @endif
                             @endif
-                            <!-- Add the "View Post" link here -->
                             <a href="{{ route('post.show', $post->id) }}" class="block text-blue-500 hover:underline text-sm mt-2">View Post</a>
                         </div>
                         <div class="flex justify-start gap-8 mt-3 text-gray-500">
@@ -222,58 +212,14 @@
         @endforelse
     </section>
 
-    <!-- Pagination -->
+    <!-- Pagination unchanged -->
     @if($posts->hasPages())
         <div class="flex justify-center py-6">
             {{ $posts->links('vendor.pagination.tailwind') }}
         </div>
     @endif
 
-    <!-- Edit Post Modal -->
-    <div class="fixed inset-0 z-50 overflow-auto bg-black/70 backdrop-blur-sm flex items-center justify-center" 
-         x-show="editModalOpen" 
-         x-cloak 
-         @keydown.escape="editModalOpen = false" 
-         x-transition:enter="transition ease-out duration-300" 
-         x-transition:enter-start="opacity-0" 
-         x-transition:enter-end="opacity-100" 
-         x-transition:leave="transition ease-in duration-200" 
-         x-transition:leave-start="opacity-100" 
-         x-transition:leave-end="opacity-0">
-        <div class="relative bg-black w-full max-w-lg rounded-xl border border-gray-800 shadow-lg p-4" @click.away="editModalOpen = false">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-white">Edit Post</h3>
-                <button @click="editModalOpen = false" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <form x-data="{ content: editingPost?.content || '', sharedLink: editingPost?.shared_link || '', media: editingPost?.media || [], newMedia: [], removedMedia: [] }" 
-                  @submit.prevent="updatePost(editingPost?.id)">
-                <div class="mb-4">
-                    <textarea x-model="content" name="content" rows="4" class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="What's on your mind?"></textarea>
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Shared Link</label>
-                    <input x-model="sharedLink" type="url" name="shared_link" class="w-full bg-transparent text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://example.com">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-400 mb-2">Media</label>
-                    <div class="grid grid-cols-3 gap-2 mb-2">
-                        <template x-for="(item, index) in media" :key="item.path">
-                            <div class="relative">
-                                <img :src="item.path" class="w-full h-24 object-cover rounded-md" alt="Media">
-                                <button type="button" @click="media.splice(index, 1); removedMedia.push(item.path)" class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1">
-                                    <i class="fa-solid fa-times"></i>
-                                </button>
-                            </div>
-                        </template>
-                    </div>
-                    <input type="file" name="media[]" multiple accept="image/*,video/*" @change="newMedia = Array.from($event.target.files)" class="w-full text-gray-400">
-                </div>
-                <button type="submit" class="w-full bg-blue-500 text-white font-bold py-2 rounded-full hover:bg-blue-600 transition-colors">Update Post</button>
-            </form>
-        </div>
-    </div>
+    
 
     <!-- Edit Profile Modal -->
     <div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black/70" 
@@ -474,13 +420,19 @@
         </div>
     </div>
 
-<script>
-   
-</script>
+    <script>
+    window.currentUserId = {{ auth()->id() ?? 'null' }};
+    document.addEventListener('DOMContentLoaded', () => {
+        const coverPhoto = document.getElementById('coverPhoto');
+        if (coverPhoto) {
+            coverPhoto.style.display = 'block'; // Ensure cover photo stays visible
+        }
+    });
+    </script>
 </main>
-
 @endsection
 
 @section('right-sidebar')
-    <!-- Right sidebar content remains unchanged -->
+    <!-- Right sidebar content unchanged -->
 @endsection
+

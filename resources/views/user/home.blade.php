@@ -93,7 +93,7 @@
                                 @if($videoId)
                                     <div class="mb-3 flex justify-center">
                                         <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                                    </div>
+                                </div>
                                 @else
                                     <div class="p-3 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
                                         <span class="text-primary hover:underline line-clamp-1">{{ $post->shared_link }}</span>
@@ -124,7 +124,7 @@
         @endforelse
     </section>
 
-    <!-- Media Modal -->
+    <!-- Media Modal unchanged -->
     <div class="fixed inset-0 z-50 overflow-auto bg-black/90 backdrop-blur-sm" 
          x-show="mediaModalOpen" 
          x-cloak 
@@ -154,13 +154,8 @@
             </div>
         </div>
     </div>
-
-    <!-- Inline script to set currentUserId -->
-    <script>
-        window.currentUserId = {{ Auth::id() ?? 'null' }};
-    </script>
 @endsection
 
 @section('right-sidebar')
-    <!-- Existing right sidebar content -->
+    <!-- Right sidebar content unchanged -->
 @endsection

@@ -5,13 +5,13 @@
 @section('content')
     <header class="sticky top-0 z-20 bg-black/95 backdrop-blur-lg border-b border-dark-border shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{{ url()->previous() }}"
+            <a href="javascript:history.back()" 
                class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                aria-label="Back">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <h1 class="text-xl font-bold">Post</h1>
-            <div class="w-8"> <!-- Empty div for balanced layout --> </div>
+            <div class="w-8"></div>
         </div>
     </header>
 
@@ -22,22 +22,25 @@
         optionsOpen: false,
         confirmDeleteOpen: false,
         postToDelete: null,
-        deletePost: window.deletePost,
+        deletePost: null,
         replyText: '',
-        canSubmit() {
-            return this.replyText.trim().length > 0;
+        canSubmit() { return this.replyText.trim().length > 0; },
+        init() {
+            setTimeout(() => {
+                this.deletePost = window.deletePost;
+                console.log('Alpine initialized, deletePost set:', this.deletePost);
+            }, 100);
         }
     }">
         <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ isOwner: {{ json_encode(Auth::check() && Auth::id() === $post->user_id) }} }">
+            <!-- All your article content stays the same until the modal... -->
             <div class="flex gap-3">
-                <!-- Profile Image -->
                 <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0 self-start">
                     <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}"
                          alt="{{ $post->user->name }}"
                          class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
                 </a>
                 <div class="flex-1 min-w-0">
-                    <!-- Post Header -->
                     <div class="flex items-center justify-between mb-1">
                         <div class="flex items-center gap-2 flex-wrap">
                             <a href="/profile/{{ $post->user->username }}"
@@ -69,13 +72,10 @@
                             </div>
                         </div>
                     </div>
-
-                    <!-- Post Metadata -->
+                    <!-- Rest of article content unchanged... -->
                     <time class="text-gray-500 text-sm block mb-2" datetime="{{ $post->created_at->toISOString() }}">
                         {{ $post->created_at->format('g:i A · M d, Y') }}
                     </time>
-
-                    <!-- Post Content -->
                     <div class="mb-3 text-white">
                         <?php
                             $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
@@ -83,19 +83,14 @@
                             $videoId = $isYoutube ? $matches[1] : null;
                             $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
                             $contentWithoutUrl = trim($contentWithoutUrl);
-
-                            // Split content into paragraphs based on double newlines
                             $paragraphs = preg_split('/\n\s*\n/', $contentWithoutUrl);
                         ?>
-
                         @if($contentWithoutUrl)
                             <div class="space-y-2 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                                 @foreach($paragraphs as $paragraph)
                                     <?php
                                         $paragraph = trim($paragraph);
-                                        // Highlight quoted text
                                         $paragraph = preg_replace('/"([^"]+)"/', '<span class="italic text-gray-300">"$1"</span>', $paragraph);
-                                        // Highlight emphasized phrases
                                         $paragraph = preg_replace('/—([^—]+)—/', '—<span class="font-semibold">$1</span>—', $paragraph);
                                     ?>
                                     <p>{!! nl2br(e($paragraph)) !!}</p>
@@ -103,8 +98,6 @@
                             </div>
                         @endif
                     </div>
-
-                    <!-- Media Content -->
                     @if($videoId && !$post->media_path && !$post->shared_link)
                         <div class="mb-3 rounded-xl overflow-hidden">
                             <div class="aspect-w-16 aspect-h-9">
@@ -116,7 +109,6 @@
                             </div>
                         </div>
                     @endif
-
                     @if($post->media_path)
                         <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
                         @if(is_array($mediaItems) && count($mediaItems) > 0)
@@ -165,8 +157,6 @@
                             <div class="text-gray-500 text-sm line-clamp-1">{{ parse_url($post->shared_link, PHP_URL_HOST) }}</div>
                         </a>
                     @endif
-
-                    <!-- Post Stats -->
                     <div class="flex items-center justify-between text-sm text-gray-500 py-2 border-t border-dark-border">
                         <div class="flex gap-4">
                             <span><strong class="text-white">0</strong> Comments</span>
@@ -174,8 +164,6 @@
                         </div>
                         <span class="text-gray-600">{{ $post->created_at->diffForHumans() }}</span>
                     </div>
-
-                    <!-- Post Actions -->
                     <div class="flex justify-between items-center py-2 border-y border-dark-border">
                         <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group"
                                 aria-label="Comments">
@@ -196,6 +184,7 @@
             </div>
         </article>
 
+        <!-- Reply form and comments section unchanged... -->
         <div class="p-4 border-b border-dark-border bg-black">
             <form class="flex gap-3" @submit.prevent="console.log('Reply submitted:', replyText)">
                 <div class="flex-shrink-0">
@@ -267,13 +256,13 @@
                     </div>
                     <h3 class="text-lg font-bold text-white">Delete Post?</h3>
                 </div>
-                <p class="text-gray-500 mb-6">This action cannot be undone. The post will be permanently removed from your profile and timeline.</p>
+                <p class="text-gray-500 mb-6">This action cannot be undone. The post will be permanently removed.</p>
                 <div class="flex justify-end gap-3">
                     <button @click="confirmDeleteOpen = false"
                             class="px-4 py-2 border border-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors">
                         Cancel
                     </button>
-                    <button @click="deletePost(postToDelete); confirmDeleteOpen = false"
+                    <button @click="deletePost(postToDelete, true); confirmDeleteOpen = false"
                             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                         Delete
                     </button>
@@ -281,7 +270,7 @@
             </div>
         </div>
 
-        <!-- Media Modal -->
+        <!-- Media Modal unchanged... -->
         <div class="fixed inset-0 z-50 overflow-auto bg-black/95 backdrop-blur-md"
              x-show="mediaModalOpen"
              x-cloak
@@ -298,7 +287,6 @@
                         aria-label="Close modal">
                     <i class="fa-solid fa-xmark text-xl"></i>
                 </button>
-
                 <div class="max-w-5xl w-full" @click.stop>
                     <template x-if="selectedMediaType === 'image'">
                         <img :src="selectedMedia"
@@ -320,8 +308,6 @@
                         </div>
                     </template>
                 </div>
-
-                <!-- Navigation arrows for galleries -->
                 <button class="absolute left-4 text-white hover:bg-white/10 p-3 rounded-full transition-colors" aria-label="Previous media">
                     <i class="fa-solid fa-chevron-left text-xl"></i>
                 </button>
@@ -331,8 +317,4 @@
             </div>
         </div>
     </section>
-
-    <script>
-    
-    </script>
 @endsection
