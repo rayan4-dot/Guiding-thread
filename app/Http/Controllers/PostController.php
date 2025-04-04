@@ -63,4 +63,36 @@ class PostController extends Controller
             ],
         ]);
     }
+
+    
+    
+    
+    
+    
+    
+    public function destroy($id)
+    {
+        $post = Post::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+
+        // Delete associated media files if they exist
+        if ($post->media_path) {
+            $mediaItems = json_decode($post->media_path, true);
+            if (is_array($mediaItems)) {
+                foreach ($mediaItems as $media) {
+                    $filePath = str_replace('/storage/', '', $media['path']);
+                    if (Storage::disk('public')->exists($filePath)) {
+                        Storage::disk('public')->delete($filePath);
+                    }
+                }
+            }
+        }
+
+        $post->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Post deleted successfully',
+            'post_id' => $id,
+        ]);
+    }
 }

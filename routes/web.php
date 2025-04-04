@@ -69,6 +69,7 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::delete('/profile/cover', [ProfileController::class, 'removeCoverPhoto'])->name('user.profile.remove-cover');
     Route::get('/home', [HomeController::class, 'index'])->name('user.home');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('post.destroy');
 });
 
 Route::get('/profile/{username}', [ProfileController::class, 'showPublicProfile'])->name('user.public-profile');

@@ -118,4 +118,6 @@ class ProfileController extends Controller
             return redirect()->route('user.profile')->with('error', 'Failed to remove cover photo: ' . $e->getMessage());
         }
     }
+
+
 }

@@ -21,9 +21,9 @@
         </div>
     </header>
 
-    <section class="divide-y divide-dark-border" x-data="{ mediaModalOpen: false, selectedMedia: '', selectedMediaType: '' }" id="posts-container">
+    <section class="divide-y divide-dark-border" id="posts-container" x-data="{ mediaModalOpen: false, selectedMedia: '', selectedMediaType: '' }">
         @forelse($posts as $post)
-            <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}">
+            <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ showOptions: false }">
                 <div class="flex gap-4">
                     <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0">
                         <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $post->user->name }}" class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
@@ -34,19 +34,32 @@
                             <span class="text-gray-500">{{ '@' . $post->user->username }}</span>
                             <span class="text-gray-500">·</span>
                             <time class="text-gray-500 hover:underline cursor-pointer">{{ $post->created_at->diffForHumans() }}</time>
-                            <button class="ml-auto text-gray-500 hover:text-primary p-1 rounded-full hover:bg-primary/10 transition-all duration-200">
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </button>
+                            <div class="relative" @click.away="showOptions = false">
+                                <button @click="showOptions = !showOptions" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+                                <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
+                                    @if(Auth::check() && Auth::id() === $post->user_id)
+                                        <a href="/post/{{ $post->id }}/edit" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-zinc-800 rounded-t-lg">
+                                            <i class="fa-solid fa-pen-to-square w-5"></i>
+                                            <span>Edit Post</span>
+                                        </a>
+                                        <button @click="showOptions = false; deletePost({{ $post->id }})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-b-lg">
+                                            <i class="fa-solid fa-trash-can w-5"></i>
+                                            <span>Delete Post</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                         <div class="block">
                             <?php 
-                        $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
-                        $isYoutube = preg_match($youtubePattern, $post->content, $matches);
-                        $videoId = $isYoutube ? $matches[1] : null;
-                        $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
-                        // Remove extra newlines and whitespace
-                        $contentWithoutUrl = preg_replace('/\s+/', ' ', $contentWithoutUrl);
-                        $contentWithoutUrl = trim($contentWithoutUrl);
+                                $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+                                $isYoutube = preg_match($youtubePattern, $post->content, $matches);
+                                $videoId = $isYoutube ? $matches[1] : null;
+                                $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
+                                $contentWithoutUrl = preg_replace('/\s+/', ' ', $contentWithoutUrl);
+                                $contentWithoutUrl = trim($contentWithoutUrl);
                             ?>
                             @if($contentWithoutUrl)
                                 <p class="mb-3 text-[15px] leading-relaxed">{{ nl2br(e($contentWithoutUrl)) }}</p>
@@ -142,112 +155,9 @@
         </div>
     </div>
 
+    <!-- Inline script to set currentUserId -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof Alpine === 'undefined') {
-                console.error('Alpine.js is not loaded!');
-                return;
-            }
-
-            window.appendNewPost = (post) => {
-                console.log('Appending post:', post);
-                const container = document.getElementById('posts-container');
-                if (!container) {
-                    console.error('Posts container not found!');
-                    return;
-                }
-
-                const youtubePattern = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|youtube\.com\/embed\/)([^"&?\/\s]{11})/i;
-                const isYoutubeContent = youtubePattern.test(post.content);
-                const videoIdContent = isYoutubeContent ? post.content.match(youtubePattern)[1] : null;
-                const isYoutubeShared = post.shared_link && youtubePattern.test(post.shared_link);
-                const videoIdShared = isYoutubeShared ? post.shared_link.match(youtubePattern)[1] : null;
-                const contentWithoutUrl = videoIdContent ? post.content.replace(youtubePattern, '').trim() : post.content;
-
-                console.log("Content Video ID: ", videoIdContent, "Shared Link Video ID: ", videoIdShared);
-
-                const mediaHtml = Array.isArray(post.media_path) && post.media_path.length > 0 ? `
-                    <div class="grid ${post.media_path.length === 1 ? 'grid-cols-1' : 'grid-cols-2'} gap-2 rounded-xl overflow-hidden mb-3">
-                        ${post.media_path.map(media => `
-                            ${media.type === 'image' ? `
-                                <img src="${media.path}" alt="Post image" class="w-full h-auto max-h-[500px] object-cover rounded-xl hover:brightness-90 transition-all duration-200 cursor-pointer" data-media="${media.path}" data-type="image">
-                            ` : `
-                                <video controls class="w-full h-auto max-h-[500px] object-cover rounded-xl">
-                                    <source src="${media.path}" type="video/mp4">
-                                    Your browser does not support the video tag.
-                                </video>
-                            `}
-                        `).join('')}
-                    </div>
-                ` : videoIdContent && !post.media_path && !post.shared_link ? `
-                    <div class="mb-3 flex justify-center">
-                        <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/${videoIdContent}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                ` : post.shared_link ? `
-                    ${videoIdShared ? `
-                        <div class="mb-3 flex justify-center">
-                            <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/${videoIdShared}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                        </div>
-                    ` : `
-                        <div class="p-3 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
-                            <span class="text-primary hover:underline line-clamp-1">${post.shared_link}</span>
-                        </div>
-                    `}
-                ` : '';
-
-                const postHtml = `
-                    <article class="p-4 border-b border-dark-border" id="post-${post.id}">
-                        <div class="flex gap-4">
-                            <a href="/profile/${post.user.username}" class="flex-shrink-0">
-                                <img src="${post.user.profile_picture}" alt="${post.user.name}" class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
-                            </a>
-                            <div class="flex-1">
-                                <div class="flex items-center gap-2 mb-1 flex-wrap">
-                                    <a href="/profile/${post.user.username}" class="font-bold hover:underline cursor-pointer">${post.user.name}</a>
-                                    <span class="text-gray-500">@${post.user.username}</span>
-                                    <span class="text-gray-500">·</span>
-                                    <time class="text-gray-500 hover:underline cursor-pointer">${post.created_at}</time>
-                                    <button class="ml-auto text-gray-500 hover:text-primary p-1 rounded-full hover:bg-primary/10 transition-all duration-200">
-                                        <i class="fa-solid fa-ellipsis"></i>
-                                    </button>
-                                </div>
-                                <div class="block">
-                                    ${contentWithoutUrl ? `<p class="mb-3 text-[15px] leading-relaxed">${contentWithoutUrl.replace(/\n/g, '<br>')}</p>` : ''}
-                                    ${mediaHtml}
-                                    <a href="/post/${post.id}" class="block text-primary hover:underline text-sm mt-2">View Post</a>
-                                </div>
-                                <div class="flex justify-start gap-8">
-                                    <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
-                                        <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                                            <i class="fa-regular fa-comment"></i>
-                                        </div>
-                                        <span>0</span>
-                                    </button>
-                                    <button class="flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like">
-                                        <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
-                                            <i class="fa-regular fa-heart"></i>
-                                        </div>
-                                        <span>0</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </article>
-                `;
-                container.insertAdjacentHTML('afterbegin', postHtml);
-
-                const newPost = document.getElementById(`post-${post.id}`);
-                newPost.querySelectorAll('img[data-media]').forEach(img => {
-                    img.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const alpineData = container.__x.$data;
-                        alpineData.mediaModalOpen = true;
-                        alpineData.selectedMedia = img.dataset.media;
-                        alpineData.selectedMediaType = img.dataset.type;
-                    });
-                });
-            };
-        });
+        window.currentUserId = {{ Auth::id() ?? 'null' }};
     </script>
 @endsection
 

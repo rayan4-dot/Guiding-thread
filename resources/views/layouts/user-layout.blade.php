@@ -8,6 +8,8 @@
     
     @production
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/fetch.js') }}" defer></script>
+
     @else
     <script src="https://cdn.tailwindcss.com"></script>
     @endproduction
