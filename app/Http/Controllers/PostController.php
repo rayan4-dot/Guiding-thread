@@ -64,17 +64,10 @@ class PostController extends Controller
         ]);
     }
 
-    
-    
-    
-    
-    
-    
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $post = Post::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
-        // Delete associated media files if they exist
         if ($post->media_path) {
             $mediaItems = json_decode($post->media_path, true);
             if (is_array($mediaItems)) {
@@ -89,10 +82,13 @@ class PostController extends Controller
 
         $post->delete();
 
+        // Redirect to previous page (or /home if no referrer)
+        $redirectUrl = $request->headers->get('referer') ? url()->previous() : route('home');
         return response()->json([
             'success' => true,
             'message' => 'Post deleted successfully',
             'post_id' => $id,
+            'redirect' => $redirectUrl,
         ]);
     }
 }

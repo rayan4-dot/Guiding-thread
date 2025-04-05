@@ -3,12 +3,14 @@
 @section('title', 'Profile')
 
 @section('content')
-<!-- Messages unchanged -->
+<!-- Display Success Message -->
 @if (session('success'))
     <div class="max-w-screen-xl mx-auto px-4 py-3 bg-green-500 text-white rounded-md mb-4">
         {{ session('success') }}
     </div>
 @endif
+
+<!-- Display Error Message -->
 @if (session('error'))
     <div class="max-w-screen-xl mx-auto px-4 py-3 bg-red-500 text-white rounded-md mb-4">
         {{ session('error') }}
@@ -19,7 +21,7 @@
 <header class="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-800">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center space-x-3">
-            <a href="javascript:history.back()" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
+            <a href="{{ url()->previous() }}" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
                 <i class="fa-solid fa-arrow-left"></i>
             </a>
             <h2 class="text-lg font-bold text-white">{{ Auth::user()->name }}</h2>
@@ -31,7 +33,7 @@
 </header>
 
 <!-- Main Content -->
-<main class="max-w-screen-xl mx-auto" x-data="{ modalOpen: false, pictureModalOpen: false, coverModalOpen: false, mediaModalOpen: false, selectedMedia: '', selectedMediaType: '', editModalOpen: false, editingPost: null }">
+<main class="max-w-screen-xl mx-auto" x-data="{ modalOpen: false, pictureModalOpen: false, coverModalOpen: false, mediaModalOpen: false, selectedMedia: '', selectedMediaType: '' }">
     <!-- Profile Header -->
     <section class="relative mb-6">
         <!-- Cover Photo -->
@@ -42,13 +44,16 @@
             </button>
         </div>
         
-        <!-- Profile Info unchanged -->
+        <!-- Profile Info -->
         <div class="relative px-4 pb-4">
+            <!-- Profile Picture -->
             <div class="absolute -top-16 left-4 ring-4 ring-black rounded-full sm:-top-20 md:-top-24">
                 <button @click="pictureModalOpen = true" class="focus:outline-none">
                     <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" alt="Profile Picture" class="w-24 h-24 rounded-full border-4 border-black hover:opacity-90 transition-opacity sm:w-28 sm:h-28 md:w-32 md:h-32">
                 </button>
             </div>
+            
+            <!-- Profile Details -->
             <div class="flex justify-between items-center pt-16 sm:pt-20 md:pt-24">
                 <div>
                     <h1 class="text-2xl font-bold text-white">{{ Auth::user()->name }}</h1>
@@ -58,9 +63,13 @@
                     Edit profile
                 </button>
             </div>
+            
+            <!-- Bio -->
             <div class="mt-3">
                 <p class="text-gray-300 text-sm">{{ Auth::user()->bio ?? 'No bio defined' }}</p>
             </div>
+            
+            <!-- Stats -->
             <div class="flex space-x-4 mt-3">
                 <div class="flex items-center space-x-1">
                     <i class="fa-regular fa-calendar text-gray-500"></i>
@@ -70,7 +79,7 @@
         </div>
     </section>
     
-    <!-- Friends Section unchanged -->
+    <!-- Friends Section -->
     <section class="px-4 mb-6">
         <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
         <div class="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8">
@@ -96,7 +105,7 @@
         </div>
     </section>
 
-    <!-- Tabs unchanged -->
+    <!-- Tabs -->
     <section class="border-b border-gray-800 mb-2">
         <div class="flex px-4">
             <button class="py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors" aria-selected="true">
@@ -125,11 +134,7 @@
                                 </button>
                                 <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
                                     @if(Auth::check() && Auth::id() === $post->user_id)
-                                        <button @click="showOptions = false; $root.editModalOpen = true; $root.editingPost = { id: {{ $post->id }}, content: '{{ addslashes($post->content) }}', media: {{ $post->media_path ?? '[]' }}, shared_link: '{{ $post->shared_link }}' }" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-800 rounded-t-lg">
-                                            <i class="fa-solid fa-pen-to-square w-5"></i>
-                                            <span>Edit Post</span>
-                                        </button>
-                                        <button @click="showOptions = false; deletePost({{ $post->id }})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-b-lg">
+                                        <button @click="showOptions = false; deletePost({{ $post->id }})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-lg">
                                             <i class="fa-solid fa-trash-can w-5"></i>
                                             <span>Delete Post</span>
                                         </button>
@@ -185,8 +190,7 @@
                                     </div>
                                 @endif
                             @endif
-                            <a href="{{ route('post.show', $post->id) }}" class="block text-blue-500 hover:underline text-sm mt-2">View Post</a>
-                        </div>
+                            <a href="{{ route('post.show', $post->id) }}?nocache={{ rand() }}" class="block text-blue-500 hover:underline text-sm mt-2">View Post</a>                        </div>
                         <div class="flex justify-start gap-8 mt-3 text-gray-500">
                             <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
                                 <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
@@ -212,14 +216,12 @@
         @endforelse
     </section>
 
-    <!-- Pagination unchanged -->
+    <!-- Pagination -->
     @if($posts->hasPages())
         <div class="flex justify-center py-6">
             {{ $posts->links('vendor.pagination.tailwind') }}
         </div>
     @endif
-
-    
 
     <!-- Edit Profile Modal -->
     <div class="fixed inset-0 z-50 overflow-auto flex items-center justify-center bg-black/70" 
@@ -422,17 +424,11 @@
 
     <script>
     window.currentUserId = {{ auth()->id() ?? 'null' }};
-    document.addEventListener('DOMContentLoaded', () => {
-        const coverPhoto = document.getElementById('coverPhoto');
-        if (coverPhoto) {
-            coverPhoto.style.display = 'block'; // Ensure cover photo stays visible
-        }
-    });
     </script>
 </main>
+
 @endsection
 
 @section('right-sidebar')
-    <!-- Right sidebar content unchanged -->
+    <!-- Right sidebar content -->
 @endsection
-

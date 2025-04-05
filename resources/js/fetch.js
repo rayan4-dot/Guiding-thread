@@ -7,11 +7,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const currentUserId = window.currentUserId || null;
 
+    // Fix cover photo disappearing
+    const coverPhoto = document.getElementById('coverPhoto');
+    if (coverPhoto) {
+        console.log('Ensuring cover photo visibility');
+        coverPhoto.style.display = 'block';
+        coverPhoto.src = coverPhoto.src + (coverPhoto.src.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+    }
+
+    // Dropdown toggle for profile menu
     window.toggleDropdown = () => {
         const dropdown = document.getElementById('dropdownMenu');
         if (dropdown) dropdown.classList.toggle('hidden');
     };
 
+    // Close dropdown on outside click
     document.addEventListener('click', (event) => {
         const dropdown = document.getElementById('dropdownMenu');
         const profile = document.querySelector('.profile-container');
@@ -20,8 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Delete post - no redirect here, server handles it
     console.log('Setting window.deletePost');
-    window.deletePost = async (postId, redirectAfterDelete = false) => {
+    window.deletePost = async (postId) => {
         console.log('deletePost called with ID:', postId);
         try {
             const response = await fetch(`/post/${postId}`, {
@@ -33,23 +44,27 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            console.log('Server response:', data);
 
             if (data.success) {
                 const postElement = document.getElementById(`post-${postId}`);
-                console.log('Removing post element:', postElement);
-                if (postElement) postElement.remove();
-
-                if (redirectAfterDelete) {
-                    console.log('Redirecting to /home');
-                    window.location.href = '/home';
-                    return; // Exit early to avoid toast on redirect
+                if (postElement) {
+                    postElement.remove();
+                    console.log(`Post ${postId} removed from DOM`);
+                } else {
+                    console.warn(`Post ${postId} not found in DOM`);
                 }
 
+                // Toast and redirect via server response
                 const toast = document.createElement('div');
                 toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
                 toast.innerHTML = '<i class="fa-solid fa-check-circle text-green-500 mr-2"></i> Post deleted successfully';
                 document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 2000);
+                setTimeout(() => {
+                    toast.remove();
+                    console.log('Toast removed');
+                    window.location.href = data.redirect; // Server decides where to go
+                }, 1000);
             } else {
                 console.error('Failed to delete post:', data.message);
                 const toast = document.createElement('div');
@@ -68,6 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    // Rest unchanged...
     window.appendNewPost = (post, isOwnerOverride = null) => {
         console.log('Appending post:', post);
         const container = document.getElementById('posts-container');
@@ -120,11 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
                 <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
-                    <a href="/post/${post.id}/edit" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-zinc-800 rounded-t-lg">
-                        <i class="fa-solid fa-pen-to-square w-5"></i>
-                        <span>Edit Post</span>
-                    </a>
-                    <button @click="showOptions = false; deletePost(${post.id})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-b-lg">
+                    <button @click="showOptions = false; deletePost(${post.id})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-lg">
                         <i class="fa-solid fa-trash-can w-5"></i>
                         <span>Delete Post</span>
                     </button>
@@ -161,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="block">
                             ${contentWithoutUrl ? `<p class="mb-3 text-[15px] leading-relaxed">${contentWithoutUrl.replace(/\n/g, '<br>')}</p>` : ''}
                             ${mediaHtml}
-                            <a href="/post/${post.id}" class="block text-primary hover:underline text-sm mt-2">View Post</a>
+                            <a href="/post/${post.id}?nocache=${Math.random()}" class="block text-primary hover:underline text-sm mt-2">View Post</a>
                         </div>
                         <div class="flex justify-start gap-8">
                             <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
@@ -209,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 });
 
+// Alpine post modal logic unchanged...
 document.addEventListener('alpine:init', () => {
     Alpine.data('postModal', () => ({
         postModalOpen: false,

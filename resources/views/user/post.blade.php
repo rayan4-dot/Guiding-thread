@@ -5,7 +5,7 @@
 @section('content')
     <header class="sticky top-0 z-20 bg-black/95 backdrop-blur-lg border-b border-dark-border shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="javascript:history.back()" 
+            <a href="{{ url()->previous() }}" 
                class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                aria-label="Back">
                 <i class="fa-solid fa-arrow-left"></i>
@@ -33,7 +33,6 @@
         }
     }">
         <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ isOwner: {{ json_encode(Auth::check() && Auth::id() === $post->user_id) }} }">
-            <!-- All your article content stays the same until the modal... -->
             <div class="flex gap-3">
                 <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0 self-start">
                     <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}"
@@ -72,10 +71,10 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Rest of article content unchanged... -->
                     <time class="text-gray-500 text-sm block mb-2" datetime="{{ $post->created_at->toISOString() }}">
                         {{ $post->created_at->format('g:i A · M d, Y') }}
                     </time>
+                    <!-- Rest of your content rendering logic remains unchanged -->
                     <div class="mb-3 text-white">
                         <?php
                             $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
@@ -184,7 +183,7 @@
             </div>
         </article>
 
-        <!-- Reply form and comments section unchanged... -->
+        <!-- Reply form and comments section unchanged -->
         <div class="p-4 border-b border-dark-border bg-black">
             <form class="flex gap-3" @submit.prevent="console.log('Reply submitted:', replyText)">
                 <div class="flex-shrink-0">
@@ -262,7 +261,7 @@
                             class="px-4 py-2 border border-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors">
                         Cancel
                     </button>
-                    <button @click="deletePost(postToDelete, true); confirmDeleteOpen = false"
+                    <button @click="deletePost(postToDelete); confirmDeleteOpen = false"
                             class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
                         Delete
                     </button>
@@ -270,7 +269,7 @@
             </div>
         </div>
 
-        <!-- Media Modal unchanged... -->
+        <!-- Media Modal unchanged -->
         <div class="fixed inset-0 z-50 overflow-auto bg-black/95 backdrop-blur-md"
              x-show="mediaModalOpen"
              x-cloak
@@ -318,3 +317,4 @@
         </div>
     </section>
 @endsection
+

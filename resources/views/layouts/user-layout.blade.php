@@ -6,20 +6,16 @@
     <meta name="description" content="A modern social media platform interface">
     <title>X-Style Social - @yield('title')</title>
 
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js']) <!-- Fetch.js comes via app.js -->
     
     @production
-
-
     @else
     <script src="https://cdn.tailwindcss.com"></script>
-
-
     @endproduction
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-    <script src="{{ asset('js/fetch.js') }}" defer></script> <!-- Include fetch.js here -->
+    <!-- Remove: <script src="{{ asset('js/fetch.js') }}" defer></script> -->
     
     <script>
         tailwind.config = {
@@ -44,31 +40,24 @@
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        
         body {
             background-color: #000000;
             color: #e7e9ea;
         }
-        
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
-        
         ::-webkit-scrollbar-track {
             background: #16181c;
         }
-        
         ::-webkit-scrollbar-thumb {
             background: #2f3336;
             border-radius: 4px;
         }
-        
         ::-webkit-scrollbar-thumb:hover {
             background: #3a3f45;
         }
-        
-        /* Fix for Alpine.js flash on load */
         [x-cloak] {
             display: none !important;
         }
@@ -92,6 +81,5 @@
         </aside>
     </div>
 </body>
-
-<script src="{{ asset('js/fetch.js') }}" defer></script>
+<!-- Remove: <script src="{{ asset('js/fetch.js') }}" defer></script> -->
 </html>
