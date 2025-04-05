@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
@@ -61,14 +63,17 @@ Route::middleware(['auth', 'is_user'])->group(function () {
         return view('user.update-password');
     })->name('user.update-password');
 
-    Route::get('/profile', [ProfileController::class, 'show'])->name('user.profile');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('user.profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('user.profile.update');
     Route::delete('/profile/picture', [ProfileController::class, 'removePicture'])->name('user.profile.remove-picture');
     Route::delete('/profile/cover', [ProfileController::class, 'removeCoverPhoto'])->name('user.profile.remove-cover');
-    Route::get('/profile/{username}', [ProfileController::class, 'showPublicProfile'])->name('user.profile.public');
-
+    Route::get('/home', [HomeController::class, 'index'])->name('user.home');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('post.destroy');
 });
 
+Route::get('/profile/{username}', [ProfileController::class, 'showPublicProfile'])->name('user.public-profile');
+Route::get('/post/{id}', [PostController::class, 'show'])->name('post.show');
 
 
 

@@ -20,103 +20,142 @@
             </button>
         </div>
     </header>
-    
-    <!-- Post Creation -->
-    <div class="border-b border-dark-border p-4 post-transition">
-        <div class="flex gap-4">
-            <img data-src="https://source.unsplash.com/random/100x100?face" alt="Your profile" class="w-12 h-12 rounded-full object-cover">
-            <div class="flex-1">
-                <textarea placeholder="What's happening?" class="w-full bg-transparent text-xl outline-none placeholder-gray-500 mb-4 resize-none min-h-[60px] focus:ring-1 focus:ring-primary rounded" aria-label="Create new post"></textarea>
-                <div class="flex items-center justify-between flex-wrap gap-3">
-                    <div class="flex gap-3 text-primary">
-                        <button class="p-2 rounded-full hover:bg-primary/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Add image">
-                            <i class="fa-regular fa-image text-xl"></i>
-                        </button>
-                        <button class="p-2 rounded-full hover:bg-primary/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Add emoji">
-                            <i class="fa-regular fa-face-smile text-xl"></i>
-                        </button>
-                        <button class="p-2 rounded-full hover:bg-primary/10 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary" aria-label="Add location">
-                            <i class="fa-solid fa-location-dot text-xl"></i>
-                        </button>
+
+    <section class="divide-y divide-dark-border" id="posts-container" x-data="{ mediaModalOpen: false, selectedMedia: '', selectedMediaType: '' }">
+        @forelse($posts as $post)
+            <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ showOptions: false }">
+                <div class="flex gap-4">
+                    <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0">
+                        <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}" alt="{{ $post->user->name }}" class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
+                    </a>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <a href="/profile/{{ $post->user->username }}" class="font-bold hover:underline cursor-pointer">{{ $post->user->name }}</a>
+                            <span class="text-gray-500">{{ '@' . $post->user->username }}</span>
+                            <span class="text-gray-500">·</span>
+                            <time class="text-gray-500 hover:underline cursor-pointer">{{ $post->created_at->diffForHumans() }}</time>
+                            <div class="relative" @click.away="showOptions = false">
+                                <button @click="showOptions = !showOptions" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </button>
+                                <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
+                                    @if(Auth::check() && Auth::id() === $post->user_id)
+                                        <a href="/post/{{ $post->id }}/edit" class="flex items-center gap-2 px-4 py-2.5 text-sm hover:bg-zinc-800 rounded-t-lg">
+                                            <i class="fa-solid fa-pen-to-square w-5"></i>
+                                            <span>Edit Post</span>
+                                        </a>
+                                        <button @click="showOptions = false; deletePost({{ $post->id }})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-b-lg">
+                                            <i class="fa-solid fa-trash-can w-5"></i>
+                                            <span>Delete Post</span>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                        <div class="block">
+                            <?php 
+                                $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+                                $isYoutube = preg_match($youtubePattern, $post->content, $matches);
+                                $videoId = $isYoutube ? $matches[1] : null;
+                                $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
+                                $contentWithoutUrl = preg_replace('/\s+/', ' ', $contentWithoutUrl);
+                                $contentWithoutUrl = trim($contentWithoutUrl);
+                            ?>
+                            @if($contentWithoutUrl)
+                                <p class="mb-3 text-[15px] leading-relaxed">{{ nl2br(e($contentWithoutUrl)) }}</p>
+                            @endif
+                            @if($videoId && !$post->media_path && !$post->shared_link)
+                                <div class="mb-3 flex justify-center">
+                                    <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                            @endif
+                            @if($post->media_path)
+                                <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
+                                @if(is_array($mediaItems) && count($mediaItems) > 0)
+                                    <div class="grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : 'grid-cols-2' }} gap-2 rounded-xl overflow-hidden mb-3">
+                                        @foreach($mediaItems as $media)
+                                            @if($media['type'] === 'image')
+                                                <img src="{{ $media['path'] }}" alt="Post image" class="w-full h-auto max-h-[500px] object-cover rounded-xl hover:brightness-90 transition-all duration-200 cursor-pointer" @click.stop="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
+                                            @elseif($media['type'] === 'video')
+                                                <video controls class="w-full h-auto max-h-[500px] object-cover rounded-xl">
+                                                    <source src="{{ $media['path'] }}" type="video/mp4">
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                @endif
+                            @elseif($post->shared_link)
+                                <?php 
+                                    $isYoutube = preg_match($youtubePattern, $post->shared_link, $matches);
+                                    $videoId = $isYoutube ? $matches[1] : null;
+                                ?>
+                                @if($videoId)
+                                    <div class="mb-3 flex justify-center">
+                                        <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/{{ $videoId }}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                                </div>
+                                @else
+                                    <div class="p-3 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
+                                        <span class="text-primary hover:underline line-clamp-1">{{ $post->shared_link }}</span>
+                                    </div>
+                                @endif
+                            @endif
+                            <a href="{{ route('post.show', $post->id) }}" class="block text-primary hover:underline text-sm mt-2">View Post</a>
+                        </div>
+                        <div class="flex justify-start gap-8">
+                            <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
+                                <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
+                                    <i class="fa-regular fa-comment"></i>
+                                </div>
+                                <span>0</span>
+                            </button>
+                            <button class="flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like">
+                                <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                                    <i class="fa-regular fa-heart"></i>
+                                </div>
+                                <span>0</span>
+                            </button>
+                        </div>
                     </div>
-                    <button class="bg-primary hover:bg-secondary text-white font-bold px-5 py-2 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-secondary" aria-label="Submit post">
-                        Post
-                    </button>
                 </div>
+            </article>
+        @empty
+            <p class="p-4 text-gray-400 text-center">No posts yet.</p>
+        @endforelse
+    </section>
+
+    <!-- Media Modal unchanged -->
+    <div class="fixed inset-0 z-50 overflow-auto bg-black/90 backdrop-blur-sm" 
+         x-show="mediaModalOpen" 
+         x-cloak 
+         @keydown.escape="mediaModalOpen = false" 
+         x-transition:enter="transition ease-out duration-300" 
+         x-transition:enter-start="opacity-0" 
+         x-transition:enter-end="opacity-100" 
+         x-transition:leave="transition ease-in duration-200" 
+         x-transition:leave-start="opacity-100" 
+         x-transition:leave-end="opacity-0">
+        <div class="relative flex items-center justify-center min-h-screen p-4" @click="mediaModalOpen = false">
+            <div class="absolute top-4 right-4 z-10">
+                <button @click="mediaModalOpen = false" class="text-white hover:bg-white/10 p-3 rounded-full transition-colors" aria-label="Close modal">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="max-w-5xl w-full" @click.stop>
+                <template x-if="selectedMediaType === 'image'">
+                    <img :src="selectedMedia" alt="Selected Media" class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+                </template>
+                <template x-if="selectedMediaType === 'video'">
+                    <video controls class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+                        <source :src="selectedMedia" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </template>
             </div>
         </div>
     </div>
-    
-
-    @foreach([
-        [
-            'id' => 'post1',
-            'user' => ['name' => 'Emma Wilson', 'handle' => '@emmaW', 'avatar' => 'https://source.unsplash.com/random/100x100?woman'],
-            'time' => '3h',
-            'content' => 'Just finished my morning hike! The view was absolutely breathtaking today. Nature always has a way of putting things into perspective.',
-            'hashtags' => ['#MorningHike', '#NatureLover'],
-            'image' => 'https://source.unsplash.com/random/600x400?hiking',
-            'comments' => 42,
-            'likes' => 287
-        ],
-
-    ] as $post)
-        <article class="post-transition p-4 border-b border-dark-border" id="{{ $post['id'] }}">
-            <div class="flex gap-4">
-                <img data-src="{{ $post['user']['avatar'] }}" alt="{{ $post['user']['name'] }} profile" class="w-12 h-12 rounded-full object-cover">
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1 flex-wrap">
-                        <span class="font-bold hover:underline cursor-pointer">{{ $post['user']['name'] }}</span>
-                        <span class="text-gray-500">{{ $post['user']['handle'] }}</span>
-                        <span class="text-gray-500">·</span>
-                        <time class="text-gray-500 hover:underline cursor-pointer">{{ $post['time'] }}</time>
-                        <div class="ml-auto relative">
-                            <button class="text-gray-500 hover:text-primary p-1 rounded-full hover:bg-primary/10 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary post-menu-btn" aria-label="More options">
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </button>
-                            <div class="absolute right-0 mt-2 w-48 bg-dark-lighter rounded-xl shadow-lg z-10 hidden post-menu">
-                                <!-- Menu options -->
-                            </div>
-                        </div>
-                    </div>
-                    <p class="mb-3 text-[15px] leading-normal">
-                        {{ $post['content'] }}
-                        @foreach($post['hashtags'] as $tag)
-                            <a href="#" class="text-primary hover:underline cursor-pointer">{{ $tag }}</a>
-                        @endforeach
-                    </p>
-                    <div class="rounded-2xl overflow-hidden mb-3 relative group cursor-pointer">
-                        <img data-src="{{ $post['image'] }}" alt="Post image" class="w-full object-cover group-hover:brightness-90 transition-all duration-200">
-                    </div>
-                    <div class="flex justify-start gap-8">
-                        <button class="post-action group comment-btn" data-post="{{ $post['id'] }}" aria-label="{{ $post['comments'] }} comments">
-                            <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors duration-200">
-                                <i class="fa-regular fa-comment text-lg"></i>
-                            </div>
-                            <span>{{ $post['comments'] }}</span>
-                        </button>
-                        <button class="post-action like group" aria-label="Like post ({{ $post['likes'] }} likes)">
-                            <div class="p-2 rounded-full group-hover:bg-pink-500/10 transition-colors duration-200">
-                                <i class="fa-regular fa-heart text-lg"></i>
-                            </div>
-                            <span>{{ $post['likes'] }}</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </article>
-    @endforeach
 @endsection
 
 @section('right-sidebar')
-    <aside class="hidden lg:block w-[350px] px-4 py-3 sticky top-0 h-screen overflow-y-auto custom-scrollbar" aria-label="Additional content">
-        <!-- Right sidebar content -->
-        <div class="mb-4">
-            <div class="relative group">
-                <input type="search" placeholder="Search" class="w-full bg-dark-lighter text-white rounded-full py-3 pl-12 pr-4 outline-none focus:bg-black focus:ring-1 focus:ring-primary transition-all duration-200" aria-label="Search platform">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-gray-500 group-focus-within:text-primary transition-colors duration-200"></i>
-            </div>
-        </div>
-        <!-- Trends and Who to follow sections -->
-    </aside>
+    <!-- Right sidebar content unchanged -->
 @endsection

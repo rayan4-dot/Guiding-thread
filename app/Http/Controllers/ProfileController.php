@@ -6,38 +6,35 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
+use App\Models\Post;
 
 class ProfileController extends Controller
 {
-    public function show()
+    public function index()
     {
         $user = Auth::user();
-        $friends = User::getNonAdminUsers(); // Fetch non-admin users (role_id = 2)
+        $posts = $user->posts()->with('user')->latest()->paginate(10); // Paginated, with user relation
+        $friends = User::getNonAdminUsers(); // Assuming this is a custom method in User model
 
-        return view('user.profile', compact('user', 'friends'));
+        return view('user.profile', compact('user', 'posts', 'friends'));
     }
 
     public function showPublicProfile($username)
     {
-        // Fetch the user by username
         $user = User::where('username', $username)->firstOrFail();
         $friends = User::where('role_id', 2)
-                      ->where('id', '!=', $user->id) // Exclude the profile owner
-                      ->take(5) // Limit to 5 users
+                      ->where('id', '!=', $user->id)
+                      ->take(5)
                       ->get();
 
-        // Determine if the user is viewing their own profile
-        $isOwnProfile = Auth::user()->id === $user->id;
-
-        // For now, assume the user is a friend since they were fetched from the friends list
-        $isFriend = !$isOwnProfile; // We'll adjust this logic later when implementing the connect feature
+        $isOwnProfile = Auth::check() && Auth::user()->id === $user->id;
+        $isFriend = !$isOwnProfile; // Placeholder until you implement real friend logic
 
         return view('user.public-profile', compact('user', 'friends', 'isOwnProfile', 'isFriend'));
     }
 
     public function update(Request $request)
     {
-        // Validate the request
         $request->validate([
             'name' => 'required|string|max:50',
             'username' => 'required|string|max:50|unique:users,username,' . Auth::id(),
@@ -52,33 +49,29 @@ class ProfileController extends Controller
 
             // Handle profile picture upload
             if ($request->hasFile('profile_picture')) {
-                // Delete old profile picture if it exists
                 if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
                     Storage::disk('public')->delete($user->profile_picture);
                 }
-                // Store new profile picture
                 $path = $request->file('profile_picture')->store('profiles', 'public');
                 $user->profile_picture = $path;
-                $user->save();
             }
 
             // Handle cover photo upload
             if ($request->hasFile('cover_photo')) {
-                // Delete old cover photo if it exists
                 if ($user->cover_photo && Storage::disk('public')->exists($user->cover_photo)) {
                     Storage::disk('public')->delete($user->cover_photo);
                 }
-                // Store new cover photo
                 $path = $request->file('cover_photo')->store('covers', 'public');
                 $user->cover_photo = $path;
-                $user->save();
             }
 
-            // Update name, username, and bio
+            // Update user details
             $user->update([
                 'name' => $request->input('name'),
                 'username' => $request->input('username'),
                 'bio' => $request->input('bio'),
+                'profile_picture' => $user->profile_picture ?? $user->getOriginal('profile_picture'),
+                'cover_photo' => $user->cover_photo ?? $user->getOriginal('cover_photo'),
             ]);
 
             return redirect()->route('user.profile')->with('success', 'Profile updated successfully');
@@ -94,12 +87,11 @@ class ProfileController extends Controller
             /** @var User $user */
             $user = Auth::user();
 
-            // Delete profile picture if it exists
             if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
                 Storage::disk('public')->delete($user->profile_picture);
+                $user->profile_picture = null;
+                $user->save();
             }
-            $user->profile_picture = null;
-            $user->save();
 
             return redirect()->route('user.profile')->with('success', 'Profile picture removed successfully');
         } catch (\Exception $e) {
@@ -114,12 +106,11 @@ class ProfileController extends Controller
             /** @var User $user */
             $user = Auth::user();
 
-            // Delete cover photo if it exists
             if ($user->cover_photo && Storage::disk('public')->exists($user->cover_photo)) {
                 Storage::disk('public')->delete($user->cover_photo);
+                $user->cover_photo = null;
+                $user->save();
             }
-            $user->cover_photo = null;
-            $user->save();
 
             return redirect()->route('user.profile')->with('success', 'Cover photo removed successfully');
         } catch (\Exception $e) {
@@ -127,4 +118,6 @@ class ProfileController extends Controller
             return redirect()->route('user.profile')->with('error', 'Failed to remove cover photo: ' . $e->getMessage());
         }
     }
+
+
 }

@@ -51,5 +51,13 @@ class User extends Authenticatable
                    ->get();
     }
 
+
+    public function posts()
+
+    {
+
+        return $this->hasMany(Post::class);
+
+    }
 }
 
