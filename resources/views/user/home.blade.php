@@ -106,12 +106,22 @@
                                 </div>
                                 <span>0</span>
                             </button>
-                            <button class="flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like">
-                                <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
-                                    <i class="fa-regular fa-heart"></i>
-                                </div>
-                                <span>0</span>
-                            </button>
+
+                            <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
+        @csrf
+        <button 
+            class="like-btn flex items-center gap-2 hover:text-red-500 transition-colors group" 
+            aria-label="Like" 
+            data-post-id="{{ $post->id }}"
+            data-liked="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}"
+        >
+            <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                <i class="fa{{ $post->isLikedBy(auth()->user()) ? 's' : 'r' }} fa-heart {{ $post->isLikedBy(auth()->user()) ? 'text-red-500' : '' }}"></i>
+            </div>
+            <span class="like-count">{{ $post->likes()->count() }}</span>
+        </button>
+    </form>
+
                         </div>
                     </div>
                 </div>
@@ -154,6 +164,10 @@
     transform: scale(1);
 }
 </style>
+
+
 @section('right-sidebar')
     <!-- Right sidebar content unchanged -->
 @endsection
+
+

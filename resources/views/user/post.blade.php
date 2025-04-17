@@ -32,156 +32,162 @@
             }, 100);
         }
     }">
-        <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ isOwner: {{ json_encode(Auth::check() && Auth::id() === $post->user_id) }} }">
-            <div class="flex gap-3">
-                <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0 self-start">
-                    <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}"
-                         alt="{{ $post->user->name }}"
-                         class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
-                </a>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between mb-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                            <a href="/profile/{{ $post->user->username }}"
-                               class="font-bold hover:underline cursor-pointer">{{ $post->user->name }}</a>
-                            <span class="text-gray-500 text-sm">{{ '@' . $post->user->username }}</span>
-                        </div>
-                        <div x-show="isOwner" class="relative">
-                            <button @click.prevent="optionsOpen = !optionsOpen"
-                                    class="text-gray-500 hover:text-white p-2 rounded-full transition-colors focus:outline-none">
-                                <i class="fa-solid fa-ellipsis"></i>
-                            </button>
-                            <div x-show="optionsOpen"
-                                 x-cloak
-                                 @click.away="optionsOpen = false"
-                                 x-transition:enter="transition ease-out duration-100"
-                                 x-transition:enter-start="opacity-0 scale-95"
-                                 x-transition:enter-end="opacity-100 scale-100"
-                                 x-transition:leave="transition ease-in duration-75"
-                                 x-transition:leave-start="opacity-100 scale-100"
-                                 x-transition:leave-end="opacity-0 scale-95"
-                                 class="absolute right-0 mt-2 w-48 bg-black border border-gray-800 rounded-md shadow-lg z-10">
-                                <a href="/post/{{ $post->id }}/edit" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
-                                    <i class="fa-solid fa-pen-to-square mr-2"></i> Edit Post
-                                </a>
-                                <button @click.prevent="postToDelete = {{ $post->id }}; confirmDeleteOpen = true; optionsOpen = false"
-                                        class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-800">
-                                    <i class="fa-solid fa-trash-can mr-2"></i> Delete Post
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <time class="text-gray-500 text-sm block mb-2" datetime="{{ $post->created_at->toISOString() }}">
-                        {{ $post->created_at->format('g:i A · M d, Y') }}
-                    </time>
-                    <!-- Rest of your content rendering logic remains unchanged -->
-                    <div class="mb-3 text-white">
-                        <?php
-                            $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
-                            $isYoutube = preg_match($youtubePattern, $post->content, $matches);
-                            $videoId = $isYoutube ? $matches[1] : null;
-                            $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
-                            $contentWithoutUrl = trim($contentWithoutUrl);
-                            $paragraphs = preg_split('/\n\s*\n/', $contentWithoutUrl);
-                        ?>
-                        @if($contentWithoutUrl)
-                            <div class="space-y-2 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
-                                @foreach($paragraphs as $paragraph)
-                                    <?php
-                                        $paragraph = trim($paragraph);
-                                        $paragraph = preg_replace('/"([^"]+)"/', '<span class="italic text-gray-300">"$1"</span>', $paragraph);
-                                        $paragraph = preg_replace('/—([^—]+)—/', '—<span class="font-semibold">$1</span>—', $paragraph);
-                                    ?>
-                                    <p>{!! nl2br(e($paragraph)) !!}</p>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-                    @if($videoId && !$post->media_path && !$post->shared_link)
-                        <div class="mb-3 rounded-xl overflow-hidden">
-                            <div class="aspect-w-16 aspect-h-9">
-                                <iframe class="w-full h-full"
-                                        src="https://www.youtube.com/embed/{{ $videoId }}"
-                                        frameborder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen></iframe>
-                            </div>
-                        </div>
-                    @endif
-                    @if($post->media_path)
-                        <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
-                        @if(is_array($mediaItems) && count($mediaItems) > 0)
-                            <div class="grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : (count($mediaItems) >= 4 ? 'grid-cols-2' : 'grid-cols-' . count($mediaItems)) }} gap-2 rounded-xl overflow-hidden mb-3">
-                                @foreach($mediaItems as $index => $media)
-                                    @if($media['type'] === 'image')
-                                        <div class="relative group overflow-hidden {{ count($mediaItems) === 3 && $index === 0 ? 'col-span-2' : '' }} {{ count($mediaItems) >= 5 && $index === 0 ? 'col-span-2 row-span-2' : '' }} rounded-xl">
-                                            <img src="{{ $media['path'] }}"
-                                                 alt="Post image"
-                                                 class="w-full h-full object-cover rounded-xl hover:brightness-90 transition-all duration-300 cursor-pointer"
-                                                 @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
-                                            <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                                <button class="p-2 bg-black/50 rounded-full"
-                                                        @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
-                                                    <i class="fa-solid fa-expand text-white"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @elseif($media['type'] === 'video')
-                                        <div class="relative group rounded-xl overflow-hidden {{ count($mediaItems) === 3 && $index === 0 ? 'col-span-2' : '' }} {{ count($mediaItems) >= 5 && $index === 0 ? 'col-span-2 row-span-2' : '' }}">
-                                            <video
-                                                class="w-full h-full object-cover rounded-xl cursor-pointer"
-                                                poster="{{ asset('images/video-poster.jpg') }}"
-                                                @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'">
-                                                <source src="{{ $media['path'] }}" type="video/mp4">
-                                                Your browser does not support the video tag.
-                                            </video>
-                                            <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-                                                <button class="p-3 bg-black/60 rounded-full"
-                                                        @click.stop="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'">
-                                                    <i class="fa-solid fa-play text-white text-xl"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        @endif
-                    @elseif($post->shared_link && !$videoId)
-                        <a href="{{ $post->shared_link }}" target="_blank" rel="noopener noreferrer"
-                           class="block p-4 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
-                            <div class="flex items-center text-primary mb-1">
-                                <i class="fa-solid fa-link mr-2"></i>
-                                <span class="hover:underline line-clamp-1 overflow-hidden text-ellipsis">{{ $post->shared_link }}</span>
-                            </div>
-                            <div class="text-gray-500 text-sm line-clamp-1">{{ parse_url($post->shared_link, PHP_URL_HOST) }}</div>
+    <article class="p-4 border-b border-dark-border" id="post-{{ $post->id }}" x-data="{ isOwner: {{ json_encode(Auth::check() && Auth::id() === $post->user_id) }} }">
+    <div class="flex gap-3">
+        <a href="/profile/{{ $post->user->username }}" class="flex-shrink-0 self-start">
+            <img src="{{ $post->user->profile_picture ? Storage::url($post->user->profile_picture) : asset('images/default-profile.png') }}"
+                 alt="{{ $post->user->name }}"
+                 class="w-12 h-12 rounded-full object-cover hover:opacity-90 transition-opacity">
+        </a>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <a href="/profile/{{ $post->user->username }}"
+                       class="font-bold hover:underline cursor-pointer">{{ $post->user->name }}</a>
+                    <span class="text-gray-500 text-sm">{{ '@' . $post->user->username }}</span>
+                </div>
+                <div x-show="isOwner" class="relative">
+                    <button @click.prevent="optionsOpen = !optionsOpen"
+                            class="text-gray-500 hover:text-white p-2 rounded-full transition-colors focus:outline-none">
+                        <i class="fa-solid fa-ellipsis"></i>
+                    </button>
+                    <div x-show="optionsOpen"
+                         x-cloak
+                         @click.away="optionsOpen = false"
+                         x-transition:enter="transition ease-out duration-100"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute right-0 mt-2 w-48 bg-black border border-gray-800 rounded-md shadow-lg z-10">
+                        <a href="/post/{{ $post->id }}/edit" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
+                            <i class="fa-solid fa-pen-to-square mr-2"></i> Edit Post
                         </a>
-                    @endif
-                    <div class="flex items-center justify-between text-sm text-gray-500 py-2 border-t border-dark-border">
-                        <div class="flex gap-4">
-                            <span><strong class="text-white">0</strong> Comments</span>
-                            <span><strong class="text-white">0</strong> Likes</span>
-                        </div>
-                        <span class="text-gray-600">{{ $post->created_at->diffForHumans() }}</span>
-                    </div>
-                    <div class="flex justify-between items-center py-2 border-y border-dark-border">
-                        <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group"
-                                aria-label="Comments">
-                            <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                                <i class="fa-regular fa-comment"></i>
-                            </div>
-                            <span class="text-sm">Comment</span>
-                        </button>
-                        <button class="flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors group"
-                                aria-label="Like">
-                            <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
-                                <i class="fa-regular fa-heart"></i>
-                            </div>
-                            <span class="text-sm">Like</span>
+                        <button @click.prevent="postToDelete = {{ $post->id }}; confirmDeleteOpen = true; optionsOpen = false"
+                                class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-800">
+                            <i class="fa-solid fa-trash-can mr-2"></i> Delete Post
                         </button>
                     </div>
                 </div>
             </div>
-        </article>
+            <time class="text-gray-500 text-sm block mb-2" datetime="{{ $post->created_at->toISOString() }}">
+                {{ $post->created_at->format('g:i A · M d, Y') }}
+            </time>
+            <!-- Content rendering logic remains unchanged -->
+            <div class="mb-3 text-white">
+                <?php
+                    $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i';
+                    $isYoutube = preg_match($youtubePattern, $post->content, $matches);
+                    $videoId = $isYoutube ? $matches[1] : null;
+                    $contentWithoutUrl = $videoId ? trim(preg_replace($youtubePattern, '', $post->content)) : $post->content;
+                    $contentWithoutUrl = trim($contentWithoutUrl);
+                    $paragraphs = preg_split('/\n\s*\n/', $contentWithoutUrl);
+                ?>
+                @if($contentWithoutUrl)
+                    <div class="space-y-2 text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                        @foreach($paragraphs as $paragraph)
+                            <?php
+                                $paragraph = trim($paragraph);
+                                $paragraph = preg_replace('/"([^"]+)"/', '<span class="italic text-gray-300">"$1"</span>', $paragraph);
+                                $paragraph = preg_replace('/—([^—]+)—/', '—<span class="font-semibold">$1</span>—', $paragraph);
+                            ?>
+                            <p>{!! nl2br(e($paragraph)) !!}</p>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+            @if($videoId && !$post->media_path && !$post->shared_link)
+                <div class="mb-3 rounded-xl overflow-hidden">
+                    <div class="aspect-w-16 aspect-h-9">
+                        <iframe class="w-full h-full"
+                                src="https://www.youtube.com/embed/{{ $videoId }}"
+                                frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen></iframe>
+                    </div>
+                </div>
+            @endif
+            @if($post->media_path)
+                <?php $mediaItems = is_string($post->media_path) ? json_decode($post->media_path, true) : $post->media_path; ?>
+                @if(is_array($mediaItems) && count($mediaItems) > 0)
+                    <div class="grid {{ count($mediaItems) === 1 ? 'grid-cols-1' : (count($mediaItems) >= 4 ? 'grid-cols-2' : 'grid-cols-' . count($mediaItems)) }} gap-2 rounded-xl overflow-hidden mb-3">
+                        @foreach($mediaItems as $index => $media)
+                            @if($media['type'] === 'image')
+                                <div class="relative group overflow-hidden {{ count($mediaItems) === 3 && $index === 0 ? 'col-span-2' : '' }} {{ count($mediaItems) >= 5 && $index === 0 ? 'col-span-2 row-span-2' : '' }} rounded-xl">
+                                    <img src="{{ $media['path'] }}"
+                                         alt="Post image"
+                                         class="w-full h-full object-cover rounded-xl hover:brightness-90 transition-all duration-300 cursor-pointer"
+                                         @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
+                                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button class="p-2 bg-black/50 rounded-full"
+                                                @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'image'">
+                                            <i class="fa-solid fa-expand text-white"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @elseif($media['type'] === 'video')
+                                <div class="relative group rounded-xl overflow-hidden {{ count($mediaItems) === 3 && $index === 0 ? 'col-span-2' : '' }} {{ count($mediaItems) >= 5 && $index === 0 ? 'col-span-2 row-span-2' : '' }}">
+                                    <video
+                                        class="w-full h-full object-cover rounded-xl cursor-pointer"
+                                        poster="{{ asset('images/video-poster.jpg') }}"
+                                        @click="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'">
+                                        <source src="{{ $media['path'] }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                                        <button class="p-3 bg-black/60 rounded-full"
+                                                @click.stop="mediaModalOpen = true; selectedMedia = '{{ $media['path'] }}'; selectedMediaType = 'video'">
+                                            <i class="fa-solid fa-play text-white text-xl"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                @endif
+            @elseif($post->shared_link && !$videoId)
+                <a href="{{ $post->shared_link }}" target="_blank" rel="noopener noreferrer"
+                   class="block p-4 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
+                    <div class="flex items-center text-primary mb-1">
+                        <i class="fa-solid fa-link mr-2"></i>
+                        <span class="hover:underline line-clamp-1 overflow-hidden text-ellipsis">{{ $post->shared_link }}</span>
+                    </div>
+                    <div class="text-gray-500 text-sm line-clamp-1">{{ parse_url($post->shared_link, PHP_URL_HOST) }}</div>
+                </a>
+            @endif
+            <div class="flex items-center justify-between text-sm text-gray-500 py-2 border-t border-dark-border">
+                <div class="flex gap-4">
+                    <span><strong class="text-white">{{ $post->likes()->count() }}</strong> Likes</span>
+                </div>
+                <span class="text-gray-600">{{ $post->created_at->diffForHumans() }}</span>
+            </div>
+            <div class="flex justify-between items-center py-2 border-y border-dark-border">
+                <button class="flex items-center gap-1 text-gray-500 hover:text-blue-500 transition-colors group"
+                        aria-label="Comments">
+                    <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
+                        <i class="fa-regular fa-comment"></i>
+                    </div>
+                    <span class="text-sm">Comment</span>
+                </button>
+                <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
+                    @csrf
+                    <button 
+                        class="like-btn flex items-center gap-1 text-gray-500 hover:text-red-500 transition-colors group" 
+                        aria-label="Like" 
+                        data-post-id="{{ $post->id }}"
+                        data-liked="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}"
+                    >
+                        <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                            <i class="fa{{ $post->isLikedBy(auth()->user()) ? 's' : 'r' }} fa-heart {{ $post->isLikedBy(auth()->user()) ? 'text-red-500' : '' }}"></i>
+                        </div>
+                        <span class="text-sm like-count">{{ $post->likes()->count() }}</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</article>
 
         <!-- Reply form and comments section unchanged -->
         <div class="p-4 border-b border-dark-border bg-black">

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\Reaction;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -10,6 +11,29 @@ use App\Models\Hashtag;
 
 class PostController extends Controller
 {
+
+    public function like(Post $post)
+    {
+        $user = Auth::user();
+    
+        $existingReaction = Reaction::where('post_id', $post->id)
+            ->where('user_id', $user->id)
+            ->first();
+    
+        if ($existingReaction) {
+            $existingReaction->delete(); // Unlike
+        } else {
+            Reaction::create([
+                'post_id' => $post->id,
+                'user_id' => $user->id,
+            ]);
+        }
+    
+        // Return 204 No Content response
+        return response()->noContent();
+    }
+    
+
     public function show($id)
     {
         $post = Post::with('user')->findOrFail($id);
