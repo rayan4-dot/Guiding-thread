@@ -16,6 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'is_user' => \App\Http\Middleware\IsUser::class,
         ]);
     })
+    ->withProviders([
+        App\Providers\ViewServiceProvider::class, 
+    ])
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();

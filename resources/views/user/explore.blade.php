@@ -52,17 +52,18 @@
         </div>
     </div>
 
-    <!-- Trending Section -->
-    <div class="p-4 space-y-6">
-        <div class="bg-dark-lighter rounded-2xl overflow-hidden">
-            <h2 class="text-xl font-bold p-4 border-b border-dark-border">Trending for you</h2>
-            <div>
+  <!-- Trending Section -->
+<div class="p-4 space-y-6">
+    <div class="bg-dark-lighter rounded-2xl overflow-hidden">
+        <h2 class="text-xl font-bold p-4 border-b border-dark-border">Trending for you</h2>
+        <div>
+            @forelse ($trendingHashtags as $hashtag)
                 <div class="cursor-pointer hover:bg-dark-hover p-4 transition-colors duration-200 border-b border-dark-border">
                     <div class="flex justify-between items-start">
                         <div>
-                            <p class="text-xs text-gray-500">Technology · Trending</p>
-                            <p class="font-bold text-[15px] mt-0.5">#AI</p>
-                            <p class="text-xs text-gray-500 mt-1">100K Tweets</p>
+                            <p class="text-xs text-gray-500">Tendance · Hashtag</p>
+                            <p class="font-bold text-[15px] mt-0.5">#{{ $hashtag->name }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ number_format($hashtag->posts_count) }} Posts</p>
                         </div>
                         <button class="text-gray-500 hover:text-primary hover:bg-primary/10 rounded-full p-2 transition-colors duration-200" aria-label="More options">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,39 +72,18 @@
                         </button>
                     </div>
                 </div>
-                
-                <div class="cursor-pointer hover:bg-dark-hover p-4 transition-colors duration-200 border-b border-dark-border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-gray-500">Entertainment · Trending</p>
-                            <p class="font-bold text-[15px] mt-0.5">#Oscars2025</p>
-                            <p class="text-xs text-gray-500 mt-1">50K Tweets</p>
-                        </div>
-                        <button class="text-gray-500 hover:text-primary hover:bg-primary/10 rounded-full p-2 transition-colors duration-200" aria-label="More options">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
+            @empty
+                <div class="p-4 text-sm text-gray-400">
+                    Aucune tendance trouvée.
                 </div>
-                
-                <div class="cursor-pointer hover:bg-dark-hover p-4 transition-colors duration-200">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-gray-500">Sports · Trending</p>
-                            <p class="font-bold text-[15px] mt-0.5">#WorldCup2025</p>
-                            <p class="text-xs text-gray-500 mt-1">200K Tweets</p>
-                        </div>
-                        <button class="text-gray-500 hover:text-primary hover:bg-primary/10 rounded-full p-2 transition-colors duration-200" aria-label="More options">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
+            @endforelse
+
+            <a href="#" class="block p-4 text-primary hover:bg-dark-hover transition-colors duration-200">
+                Voir plus
+            </a>
         </div>
     </div>
+</div>
 
     <!-- People to Follow Section -->
     <div class="p-4 space-y-6">
