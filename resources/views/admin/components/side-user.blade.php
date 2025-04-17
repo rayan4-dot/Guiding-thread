@@ -82,7 +82,7 @@
     <!-- Background Overlay -->
     <div id="postModalOverlay" class="fixed inset-0 z-40 bg-black/70 hidden"></div>
 
-    <!-- Post Creation Modal -->
+
    <!-- Post Creation Modal -->
    <div id="postModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
         <div class="relative bg-dark-lighter w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">

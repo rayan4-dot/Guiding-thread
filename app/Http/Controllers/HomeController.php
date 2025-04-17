@@ -12,4 +12,6 @@ class HomeController extends Controller
         $posts = Post::with('user')->latest()->take(10)->get(); // Fetch latest 10 posts from all users
         return view('user.home', compact('posts'));
     }
+
+    
 }
