@@ -45,9 +45,10 @@
         </a>
     </nav>
 
+
     <!-- Post Button -->
     <div class="mt-6">
-        <button @click="postModalOpen = true" class="w-full bg-primary hover:bg-secondary text-white font-bold py-3 px-4 rounded-full transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/20">
+        <button id="openPostModal" class="w-full bg-primary hover:bg-secondary text-white font-bold py-3 px-4 rounded-full transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/20">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
             </svg>
@@ -79,15 +80,16 @@
     </div>
 
     <!-- Background Overlay -->
-    <div class="fixed inset-0 z-40 bg-black/70" x-show="postModalOpen" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></div>
+    <div id="postModalOverlay" class="fixed inset-0 z-40 bg-black/70 hidden"></div>
 
     <!-- Post Creation Modal -->
-    <div class="fixed inset-0 z-50 flex items-center justify-center p-4" x-show="postModalOpen" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" x-init="initModal">
-        <div class="relative bg-dark-lighter w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden" @click.away="postModalOpen = false">
+   <!-- Post Creation Modal -->
+   <div id="postModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+        <div class="relative bg-dark-lighter w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
             <div class="bg-gradient-to-r from-primary/20 to-secondary/20 h-2"></div>
             <div class="p-4">
                 <div class="flex items-center justify-between mb-4">
-                    <button @click="postModalOpen = false" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
+                    <button id="closePostModal" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
                         <i class="fa-solid fa-xmark text-2xl"></i>
                     </button>
                     <div class="text-lg font-bold text-gray-300">Create Post</div>
@@ -107,7 +109,7 @@
                         <div class="flex gap-4 text-primary">
                             <label class="cursor-pointer hover:bg-dark-hover p-2 rounded-full transition-colors flex items-center justify-center">
                                 <i class="fa-regular fa-image text-xl"></i>
-                                <input type="file" name="media[]" class="hidden" accept="image/*,video/mp4" multiple>
+                                <input type="file" name="media[]" id="mediaInput" class="hidden" accept="image/*,video/mp4" multiple>
                             </label>
                         </div>
                         <button type="submit" id="submitPost" class="bg-primary text-white font-bold px-6 py-2 rounded-full hover:bg-secondary transition-colors disabled:bg-gray-700 disabled:text-gray-400 text-base shadow-lg" disabled>Post</button>

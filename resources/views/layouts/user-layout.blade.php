@@ -14,7 +14,7 @@
     @endproduction
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
     <!-- Remove: <script src="{{ asset('js/fetch.js') }}" defer></script> -->
     
     <script>
@@ -81,5 +81,5 @@
         </aside>
     </div>
 </body>
-<!-- Remove: <script src="{{ asset('js/fetch.js') }}" defer></script> -->
+ <script src="{{ asset('js/fetch.js') }}" defer></script>
 </html>

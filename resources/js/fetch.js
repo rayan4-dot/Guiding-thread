@@ -1,19 +1,196 @@
+// resources/js/fetch.js
 document.addEventListener('DOMContentLoaded', () => {
     console.log('fetch.js loaded and running!');
-    if (typeof Alpine === 'undefined') {
-        console.error('Alpine.js is not loaded!');
-        return;
-    }
 
     const currentUserId = window.currentUserId || null;
 
-    // Fix cover photo disappearing
-    const coverPhoto = document.getElementById('coverPhoto');
-    if (coverPhoto) {
-        console.log('Ensuring cover photo visibility');
-        coverPhoto.style.display = 'block';
-        coverPhoto.src = coverPhoto.src + (coverPhoto.src.includes('?') ? '&' : '?') + 't=' + new Date().getTime();
+    // Modal elements
+    const openModalBtn = document.getElementById('openPostModal');
+    const postModal = document.getElementById('postModal');
+    const postModalOverlay = document.getElementById('postModalOverlay');
+    const closeModalBtn = document.getElementById('closePostModal');
+    const postForm = document.getElementById('postForm');
+    const submitBtn = document.getElementById('submitPost');
+    const contentInput = postForm.querySelector('textarea[name="content"]');
+    const mediaInput = document.getElementById('mediaInput');
+    const previewContainer = document.getElementById('mediaPreviewContainer');
+    const clearMediaBtn = document.getElementById('clearMedia');
+
+    // Modal toggle functions
+    const openModal = () => {
+        postModal.classList.remove('hidden');
+        postModalOverlay.classList.remove('hidden');
+    };
+
+    const closeModal = () => {
+        postModal.classList.add('hidden');
+        postModalOverlay.classList.add('hidden');
+        postForm.reset();
+        previewContainer.innerHTML = '';
+        previewContainer.classList.add('hidden');
+        clearMediaBtn.classList.add('hidden');
+        submitBtn.disabled = true;
+    };
+
+    // Event listeners for modal
+    if (openModalBtn) {
+        openModalBtn.addEventListener('click', openModal);
     }
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeModal);
+    }
+    if (postModalOverlay) {
+        postModalOverlay.addEventListener('click', closeModal);
+    }
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !postModal.classList.contains('hidden')) {
+            closeModal();
+        }
+    });
+
+    // Form handling
+    const updateSubmitButton = () => {
+        const hasContent = contentInput.value.trim().length > 0;
+        const hasMedia = mediaInput.files && mediaInput.files.length > 0;
+        submitBtn.disabled = !(hasContent || hasMedia);
+    };
+
+    contentInput.addEventListener('input', updateSubmitButton);
+
+    mediaInput.addEventListener('change', () => {
+        console.log('Media input changed, files:', mediaInput.files);
+        previewContainer.innerHTML = '';
+        if (mediaInput.files && mediaInput.files.length > 0) {
+            if (mediaInput.files.length > 4) {
+                alert('Max 4 files allowed.');
+                mediaInput.value = '';
+                return;
+            }
+            previewContainer.classList.remove('hidden');
+            clearMediaBtn.classList.remove('hidden');
+            Array.from(mediaInput.files).forEach(file => {
+                const fileType = file.type;
+                console.log('Processing file:', file.name, fileType);
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'relative rounded-xl overflow-hidden bg-black/40 mb-2';
+                if (fileType.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.className = 'max-h-32 w-full object-contain';
+                    img.alt = 'Preview';
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        console.log('Image loaded for:', file.name);
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                    previewDiv.appendChild(img);
+                } else if (fileType.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.className = 'max-h-32 w-full object-contain';
+                    video.controls = true;
+                    video.src = URL.createObjectURL(file);
+                    console.log('Video URL set for:', file.name);
+                    previewDiv.appendChild(video);
+                }
+                const filenameP = document.createElement('p');
+                filenameP.className = 'text-xs text-gray-500 mt-1 truncate';
+                filenameP.textContent = file.name;
+                previewDiv.appendChild(filenameP);
+                previewContainer.appendChild(previewDiv);
+            });
+        } else {
+            previewContainer.classList.add('hidden');
+            clearMediaBtn.classList.add('hidden');
+        }
+        updateSubmitButton();
+    });
+
+    clearMediaBtn.addEventListener('click', () => {
+        mediaInput.value = '';
+        previewContainer.innerHTML = '';
+        previewContainer.classList.add('hidden');
+        clearMediaBtn.classList.add('hidden');
+        updateSubmitButton();
+    });
+
+    postForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        console.log('Form submitting from:', window.location.pathname);
+
+        const errorSpans = ['content', 'media'].map(field => document.getElementById(`${field}-error`));
+        errorSpans.forEach(span => span && (span.classList.add('hidden'), span.textContent = ''));
+
+        try {
+            const formData = new FormData(postForm);
+            console.log('Form data:', Array.from(formData.entries()));
+            const response = await fetch(postForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
+
+            console.log('Response status:', response.status);
+            const text = await response.text();
+            console.log('Response text:', text);
+
+            if (!response.ok) {
+                try {
+                    const error = JSON.parse(text);
+                    throw error;
+                } catch {
+                    throw new Error('Non-JSON error: ' + text);
+                }
+            }
+
+            const data = JSON.parse(text);
+            console.log('Parsed response:', data);
+
+            if (data.success) {
+                postForm.reset();
+                previewContainer.innerHTML = '';
+                previewContainer.classList.add('hidden');
+                clearMediaBtn.classList.add('hidden');
+                closeModal();
+
+                console.log('Calling appendNewPost with:', data.post);
+                if (typeof window.appendNewPost === 'function') {
+                    window.appendNewPost(data.post);
+                } else {
+                    console.log('appendNewPost not found on this page');
+                }
+
+                window.showToast('Post created successfully!', data.post.id);
+            } else if (data.errors) {
+                Object.keys(data.errors).forEach(field => {
+                    const errorSpan = document.getElementById(`${field}-error`);
+                    if (errorSpan) {
+                        errorSpan.textContent = data.errors[field][0];
+                        errorSpan.classList.remove('hidden');
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Submission error:', error);
+            if (error.errors) {
+                Object.keys(error.errors).forEach(field => {
+                    const errorSpan = document.getElementById(`${field}-error`);
+                    if (errorSpan) {
+                        errorSpan.textContent = error.errors[field][0];
+                        errorSpan.classList.remove('hidden');
+                    }
+                });
+            } else {
+                console.error('Detailed error:', error.message);
+                alert('Submission failed: ' + error.message);
+            }
+        } finally {
+            submitBtn.disabled = false;
+        }
+    });
 
     // Dropdown toggle for profile menu
     window.toggleDropdown = () => {
@@ -30,8 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Delete post - no redirect here, server handles it
-    console.log('Setting window.deletePost');
+    // Delete post
     window.deletePost = async (postId) => {
         console.log('deletePost called with ID:', postId);
         try {
@@ -55,7 +231,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.warn(`Post ${postId} not found in DOM`);
                 }
 
-                // Toast and redirect via server response
                 const toast = document.createElement('div');
                 toast.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-full shadow-lg z-50 flex items-center';
                 toast.innerHTML = '<i class="fa-solid fa-check-circle text-green-500 mr-2"></i> Post deleted successfully';
@@ -63,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 setTimeout(() => {
                     toast.remove();
                     console.log('Toast removed');
-                    window.location.href = data.redirect; // Server decides where to go
+                    window.location.href = data.redirect;
                 }, 1000);
             } else {
                 console.error('Failed to delete post:', data.message);
@@ -83,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Rest unchanged...
+    // Append new post
     window.appendNewPost = (post, isOwnerOverride = null) => {
         console.log('Appending post:', post);
         const container = document.getElementById('posts-container');
@@ -122,7 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ${videoIdShared ? `
                 <div class="mb-3 flex justify-center">
                     <iframe class="w-full max-w-2xl h-64 rounded-xl" src="https://www.youtube.com/embed/${videoIdShared}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                </div>
+            </div>
             ` : `
                 <div class="p-3 border border-dark-border rounded-xl hover:bg-dark-hover/30 transition-all mb-3">
                     <span class="text-primary hover:underline line-clamp-1">${post.shared_link}</span>
@@ -131,23 +306,23 @@ document.addEventListener('DOMContentLoaded', () => {
         ` : '';
 
         const dropdownHtml = isOwner ? `
-            <div class="relative" x-data="{ showOptions: false }" @click.away="showOptions = false">
-                <button @click="showOptions = !showOptions" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+            <div class="relative">
+                <button onclick="document.getElementById('options-${post.id}').classList.toggle('hidden')" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
-                <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
-                    <button @click="showOptions = false; deletePost(${post.id})" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-lg">
+                <div id="options-${post.id}" class="hidden absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
+                    <button onclick="deletePost(${post.id}); document.getElementById('options-${post.id}').classList.add('hidden')" class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm text-red-500 hover:bg-zinc-800 rounded-lg">
                         <i class="fa-solid fa-trash-can w-5"></i>
                         <span>Delete Post</span>
                     </button>
                 </div>
             </div>
         ` : `
-            <div class="relative" x-data="{ showOptions: false }" @click.away="showOptions = false">
-                <button @click="showOptions = !showOptions" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
+            <div class="relative">
+                <button onclick="document.getElementById('options-${post.id}').classList.toggle('hidden')" class="p-2 rounded-full hover:bg-zinc-800 transition-colors">
                     <i class="fa-solid fa-ellipsis"></i>
                 </button>
-                <div x-show="showOptions" x-cloak x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" class="absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
+                <div id="options-${post.id}" class="hidden absolute right-0 mt-1 w-48 bg-zinc-900 border border-zinc-700 rounded-lg shadow-xl z-10">
                     <button class="flex items-center gap-2 w-full text-left px-4 py-2.5 text-sm hover:bg-zinc-800 rounded-lg">
                         <i class="fa-solid fa-flag w-5"></i>
                         <span>Report Post</span>
@@ -200,10 +375,19 @@ document.addEventListener('DOMContentLoaded', () => {
             newPost.querySelectorAll('img[data-media]').forEach(img => {
                 img.addEventListener('click', (e) => {
                     e.preventDefault();
-                    const alpineData = container.__x.$data;
-                    alpineData.mediaModalOpen = true;
-                    alpineData.selectedMedia = img.dataset.media;
-                    alpineData.selectedMediaType = img.dataset.type;
+                    const mediaModal = document.getElementById('mediaModal');
+                    const mediaModalImg = mediaModal.querySelector('img');
+                    const mediaModalVideo = mediaModal.querySelector('video');
+                    if (img.dataset.type === 'image') {
+                        mediaModalImg.src = img.dataset.media;
+                        mediaModalImg.classList.remove('hidden');
+                        mediaModalVideo.classList.add('hidden');
+                    } else {
+                        mediaModalVideo.querySelector('source').src = img.dataset.media;
+                        mediaModalVideo.classList.remove('hidden');
+                        mediaModalImg.classList.add('hidden');
+                    }
+                    mediaModal.classList.remove('hidden');
                 });
             });
         }
@@ -219,164 +403,4 @@ document.addEventListener('DOMContentLoaded', () => {
         document.body.appendChild(toast);
         setTimeout(() => toast.remove(), 5000);
     };
-});
-
-// Alpine post modal logic unchanged...
-document.addEventListener('alpine:init', () => {
-    Alpine.data('postModal', () => ({
-        postModalOpen: false,
-        initModal() {
-            const form = document.getElementById('postForm');
-            const submitBtn = document.getElementById('submitPost');
-            const contentInput = form.querySelector('textarea[name="content"]');
-            const mediaInput = form.querySelector('input[name="media[]"]');
-            const previewContainer = document.getElementById('mediaPreviewContainer');
-            const clearMediaBtn = document.getElementById('clearMedia');
-
-            const updateSubmitButton = () => {
-                const hasContent = contentInput.value.trim().length > 0;
-                const hasMedia = mediaInput.files && mediaInput.files.length > 0;
-                submitBtn.disabled = !(hasContent || hasMedia);
-            };
-
-            contentInput.addEventListener('input', updateSubmitButton);
-
-            mediaInput.addEventListener('change', () => {
-                console.log('Media input changed, files:', mediaInput.files);
-                previewContainer.innerHTML = '';
-                if (mediaInput.files && mediaInput.files.length > 0) {
-                    if (mediaInput.files.length > 4) {
-                        alert('Max 4 files allowed.');
-                        mediaInput.value = '';
-                        return;
-                    }
-                    previewContainer.classList.remove('hidden');
-                    clearMediaBtn.classList.remove('hidden');
-                    Array.from(mediaInput.files).forEach(file => {
-                        const fileType = file.type;
-                        console.log('Processing file:', file.name, fileType);
-                        const previewDiv = document.createElement('div');
-                        previewDiv.className = 'relative rounded-xl overflow-hidden bg-black/40 mb-2';
-                        if (fileType.startsWith('image/')) {
-                            const img = document.createElement('img');
-                            img.className = 'max-h-32 w-full object-contain';
-                            img.alt = 'Preview';
-                            const reader = new FileReader();
-                            reader.onload = (e) => {
-                                console.log('Image loaded for:', file.name);
-                                img.src = e.target.result;
-                            };
-                            reader.readAsDataURL(file);
-                            previewDiv.appendChild(img);
-                        } else if (fileType.startsWith('video/')) {
-                            const video = document.createElement('video');
-                            video.className = 'max-h-32 w-full object-contain';
-                            video.controls = true;
-                            video.src = URL.createObjectURL(file);
-                            console.log('Video URL set for:', file.name);
-                            previewDiv.appendChild(video);
-                        }
-                        const filenameP = document.createElement('p');
-                        filenameP.className = 'text-xs text-gray-500 mt-1 truncate';
-                        filenameP.textContent = file.name;
-                        previewDiv.appendChild(filenameP);
-                        previewContainer.appendChild(previewDiv);
-                    });
-                } else {
-                    previewContainer.classList.add('hidden');
-                    clearMediaBtn.classList.add('hidden');
-                }
-                updateSubmitButton();
-            });
-
-            clearMediaBtn.addEventListener('click', () => {
-                mediaInput.value = '';
-                previewContainer.innerHTML = '';
-                previewContainer.classList.add('hidden');
-                clearMediaBtn.classList.add('hidden');
-                updateSubmitButton();
-            });
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                submitBtn.disabled = true;
-                console.log('Form submitting from:', window.location.pathname);
-
-                const errorSpans = ['content', 'media'].map(field => document.getElementById(`${field}-error`));
-                errorSpans.forEach(span => span && (span.classList.add('hidden'), span.textContent = ''));
-
-                try {
-                    const formData = new FormData(form);
-                    console.log('Form data:', Array.from(formData.entries()));
-                    const response = await fetch(form.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Accept': 'application/json'
-                        }
-                    });
-
-                    console.log('Response status:', response.status);
-                    const text = await response.text();
-                    console.log('Response text:', text);
-
-                    if (!response.ok) {
-                        try {
-                            const error = JSON.parse(text);
-                            throw error;
-                        } catch {
-                            throw new Error('Non-JSON error: ' + text);
-                        }
-                    }
-
-                    const data = JSON.parse(text);
-                    console.log('Parsed response:', data);
-
-                    if (data.success) {
-                        form.reset();
-                        previewContainer.innerHTML = '';
-                        previewContainer.classList.add('hidden');
-                        clearMediaBtn.classList.add('hidden');
-                        this.postModalOpen = false;
-
-                        console.log('Calling appendNewPost with:', data.post);
-                        if (typeof window.appendNewPost === 'function') {
-                            window.appendNewPost(data.post);
-                        } else {
-                            console.log('appendNewPost not found on this page');
-                        }
-
-                        window.showToast('Post created successfully!', data.post.id);
-                    } else if (data.errors) {
-                        Object.keys(data.errors).forEach(field => {
-                            const errorSpan = document.getElementById(`${field}-error`);
-                            if (errorSpan) {
-                                errorSpan.textContent = data.errors[field][0];
-                                errorSpan.classList.remove('hidden');
-                            }
-                        });
-                    }
-                } catch (error) {
-                    console.error('Submission error:', error);
-                    if (error.errors) {
-                        Object.keys(error.errors).forEach(field => {
-                            const errorSpan = document.getElementById(`${field}-error`);
-                            if (errorSpan) {
-                                errorSpan.textContent = error.errors[field][0];
-                                errorSpan.classList.remove('hidden');
-                            }
-                        });
-                    } else {
-                        console.error('Detailed error:', error.message);
-                        alert('Submission failed: ' + error.message);
-                    }
-                } finally {
-                    submitBtn.disabled = false;
-                }
-            });
-
-            updateSubmitButton();
-        }
-    }));
 });
