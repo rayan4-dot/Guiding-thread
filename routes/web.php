@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 
+
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('Admin.dashboard');
@@ -62,6 +63,7 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/update-password', function () {
         return view('user.update-password');
     })->name('user.update-password');
+    Route::post('/posts/{post}/like', [PostController::class, 'like'])->name('posts.like');
 
     Route::get('/profile', [ProfileController::class, 'index'])->name('user.profile');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('user.profile.update');

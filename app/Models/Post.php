@@ -28,4 +28,23 @@ class Post extends Model
 {
     return $this->belongsToMany(Hashtag::class, 'hashtag_post');
 }
+
+
+
+public function reactions()
+{
+    return $this->hasMany(Reaction::class);
+}
+
+public function likes()
+{
+    return $this->reactions();
+}
+
+public function isLikedBy($user)
+{
+    return $this->likes()->where('user_id', $user->id)->exists();
+}
+
+
 }
