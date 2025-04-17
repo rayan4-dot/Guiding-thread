@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+use App\Models\Hashtag;
 
 class Post extends Model
 {
@@ -22,4 +23,9 @@ class Post extends Model
     {
         return $this->hasMany(PostMedia::class);
     }
+
+    public function hashtags()
+{
+    return $this->belongsToMany(Hashtag::class, 'hashtag_post');
+}
 }

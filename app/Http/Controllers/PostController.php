@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Post;
+use App\Models\Hashtag;
 
 class PostController extends Controller
 {
@@ -43,6 +44,20 @@ class PostController extends Controller
         }
 
         $post->save();
+
+        if ($post->content) {
+            preg_match_all('/#(\w+)/u', $post->content, $matches);
+        
+            $hashtags = [];
+            foreach ($matches[1] as $tagName) {
+                $tag = Hashtag::firstOrCreate(['name' => strtolower($tagName)]);
+                $hashtags[] = $tag->id;
+            }
+        
+            if (!empty($hashtags)) {
+                $post->hashtags()->sync($hashtags); // many-to-many
+            }
+        }
 
         return response()->json([
             'success' => true,
