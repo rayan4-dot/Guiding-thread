@@ -5,7 +5,7 @@
 @section('content')
     <header class="sticky top-0 z-20 bg-black/95 backdrop-blur-lg border-b border-dark-border shadow-lg">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="{{ url()->previous() }}" 
+            <a href="javascript:history.back()" 
                class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary"
                aria-label="Back">
                 <i class="fa-solid fa-arrow-left"></i>

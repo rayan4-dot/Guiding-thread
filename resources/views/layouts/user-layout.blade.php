@@ -81,5 +81,7 @@
         </aside>
     </div>
 </body>
- <script src="{{ asset('js/fetch.js') }}" defer></script>
+@vite(['resources/js/fetch.js'])
+
+
 </html>
