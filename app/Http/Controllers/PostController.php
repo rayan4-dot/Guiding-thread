@@ -11,7 +11,6 @@ use App\Models\Hashtag;
 
 class PostController extends Controller
 {
-
     public function like(Post $post)
     {
         $user = Auth::user();
@@ -21,7 +20,7 @@ class PostController extends Controller
             ->first();
     
         if ($existingReaction) {
-            $existingReaction->delete(); // Unlike
+            $existingReaction->delete(); 
         } else {
             Reaction::create([
                 'post_id' => $post->id,
@@ -29,14 +28,13 @@ class PostController extends Controller
             ]);
         }
     
-        // Return 204 No Content response
         return response()->noContent();
     }
     
-
     public function show($id)
     {
         $post = Post::with('user')->findOrFail($id);
+        $post->load('comments.user');
         return view('user.post', compact('post'));
     }
 
@@ -79,7 +77,7 @@ class PostController extends Controller
             }
         
             if (!empty($hashtags)) {
-                $post->hashtags()->sync($hashtags); // many-to-many
+                $post->hashtags()->sync($hashtags); 
             }
         }
 
@@ -103,7 +101,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy($id, Request $request)
+    public function destroy($id)
     {
         $post = Post::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
@@ -121,13 +119,6 @@ class PostController extends Controller
 
         $post->delete();
 
-        // Redirect to previous page (or /home if no referrer)
-        $redirectUrl = $request->headers->get('referer') ? url()->previous() : route('home');
-        return response()->json([
-            'success' => true,
-            'message' => 'Post deleted successfully',
-            'post_id' => $id,
-            'redirect' => $redirectUrl,
-        ]);
+        return redirect()->route('home')->with('success', 'Post deleted successfully.');
     }
 }
