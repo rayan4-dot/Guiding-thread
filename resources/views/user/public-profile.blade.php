@@ -3,6 +3,9 @@
 @section('title', $user->name . "'s Profile")
 
 @section('content')
+<!-- CSRF Token -->
+<meta name="csrf-token" content="{{ csrf_token() }}">
+
 <!-- Fixed Header -->
 <header class="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-dark-border">
     <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -17,6 +20,18 @@
 
 <!-- Main Content -->
 <main class="max-w-screen-xl mx-auto">
+    <!-- Flash Messages -->
+    @if (session('success'))
+        <div class="bg-green-500 text-white px-4 py-2 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="bg-red-500 text-white px-4 py-2 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <!-- Profile Header -->
     <section class="relative mb-6">
         <!-- Cover Photo -->
@@ -42,9 +57,34 @@
                     <h1 class="text-2xl font-bold text-white">{{ $user->name }}</h1>
                     <p class="text-gray-400 text-sm">{{ '@' . $user->username }}</p>
                 </div>
-                <button class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
-                    Follow
-                </button>
+                @auth
+                    @if(auth()->id() !== $user->id)
+                        @if($is_following)
+                            <form action="{{ route('unfollow', $user) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Unfollow">
+                                    Unfollow
+                                </button>
+                            </form>
+                        @else
+                            <form action="{{ route('follow', $user) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Follow">
+                                    Follow
+                                </button>
+                            </form>
+                        @endif
+                    @else
+                        <a href="{{ route('user.profile') }}" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
+                            Edit Profile
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('login') }}" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Log in to follow">
+                        Follow
+                    </a>
+                @endauth
             </div>
             
             <!-- Bio -->
@@ -115,7 +155,7 @@
                             @endif
                             <div class="flex justify-start gap-8 mt-3 text-gray-500">
                                 <!-- Comments -->
-                                <a href="{{ route('post.show', $post->id) }}#comments" class="flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Comments">
+                                <a href="{{ route('post.show', $post->id) }}#comments" class="flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Comments" title="View comments">
                                     <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                                         <i class="fa-regular fa-comment"></i>
                                     </div>
@@ -123,17 +163,14 @@
                                 </a>
                                 <!-- Likes -->
                                 @auth
-                                    <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
-                                        @csrf
-                                        <button class="like-btn flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like" data-post-id="{{ $post->id }}" data-liked="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}">
-                                            <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
-                                                <i class="fa{{ $post->isLikedBy(auth()->user()) ? 's' : 'r' }} fa-heart {{ $post->isLikedBy(auth()->user()) ? 'text-red-500' : '' }}"></i>
-                                            </div>
-                                            <span class="like-count">{{ $post->likes()->count() }}</span>
-                                        </button>
-                                    </form>
+                                    <button class="like-btn flex items-center gap-2 hover:text-red-500 transition-colors group" aria-label="Like" data-post-id="{{ $post->id }}" data-liked="{{ $post->isLikedBy(auth()->user()) ? 'true' : 'false' }}" title="{{ $post->isLikedBy(auth()->user()) ? 'Unlike' : 'Like' }}">
+                                        <div class="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                                            <i class="fa{{ $post->isLikedBy(auth()->user()) ? 's' : 'r' }} fa-heart {{ $post->isLikedBy(auth()->user()) ? 'text-red-500' : '' }}"></i>
+                                        </div>
+                                        <span class="like-count">{{ $post->likes()->count() }}</span>
+                                    </button>
                                 @else
-                                    <div class="flex items-center gap-2 text-gray-500" aria-label="Likes">
+                                    <div class="flex items-center gap-2 text-gray-500" aria-label="Likes" title="Log in to like">
                                         <div class="p-2 rounded-full">
                                             <i class="far fa-heart"></i>
                                         </div>
@@ -141,7 +178,7 @@
                                     </div>
                                 @endauth
                                 <!-- Views -->
-                                <a href="{{ route('post.show', $post->id) }}" class="flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Views">
+                                <a href="{{ route('post.show', $post->id) }}" class="flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Views" title="View post">
                                     <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                                         <i class="fa-regular fa-eye"></i>
                                     </div>
@@ -175,7 +212,7 @@
         <div class="relative bg-black w-full max-w-md rounded-xl border border-dark-border shadow-lg">
             <div class="flex items-center justify-between px-4 py-3 border-b border-dark-border">
                 <h3 class="text-xl font-bold text-white">Profile Picture</h3>
-                <button onclick="document.getElementById('pictureModal').classList.remove('hidden')" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
+                <button onclick="document.getElementById('pictureModal').classList.add('hidden')" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -190,7 +227,7 @@
         <div class="relative bg-black w-full max-w-3xl rounded-xl border border-dark-border shadow-lg">
             <div class="flex items-center justify-between px-4 py-3 border-b border-dark-border">
                 <h3 class="text-xl font-bold text-white">Cover Photo</h3>
-                <button onclick="document.getElementById('coverModal').classList.remove('hidden')" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
+                <button onclick="document.getElementById('coverModal').classList.add('hidden')" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
@@ -270,6 +307,47 @@
             document.getElementById('coverModal')?.classList.add('hidden');
             document.getElementById('mediaModal')?.classList.add('hidden');
         }
+    });
+
+    // AJAX Like Functionality
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const postId = this.dataset.postId;
+            const isLiked = this.dataset.liked === 'true';
+            const likeCountSpan = this.querySelector('.like-count');
+            const heartIcon = this.querySelector('i');
+
+            try {
+                const response = await fetch(`/posts/${postId}/like`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    likeCountSpan.textContent = data.likes_count;
+                    this.dataset.liked = !isLiked;
+                    heartIcon.classList.toggle('far', isLiked);
+                    heartIcon.classList.toggle('fas', !isLiked);
+                    heartIcon.classList.toggle('text-red-500', !isLiked);
+                    this.title = isLiked ? 'Like' : 'Unlike';
+                } else {
+                    if (data.error === 'Unauthenticated') {
+                        alert('Please log in to like posts.');
+                    } else {
+                        alert(data.error || 'Failed to like post.');
+                    }
+                }
+            } catch (error) {
+                console.error('Like error:', error);
+                alert('An error occurred while liking the post.');
+            }
+        });
     });
 </script>
 @endsection
