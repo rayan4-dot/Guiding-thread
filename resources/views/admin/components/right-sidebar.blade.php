@@ -50,9 +50,7 @@
                         </div>
                     @endforelse
 
-                    <a href="#" class="block p-4 text-primary hover:bg-dark-hover transition-colors duration-200">
-                        Voir plus
-                    </a>
+  
                 </div>
             </div>
 

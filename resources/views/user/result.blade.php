@@ -137,13 +137,13 @@
                                             </div>
                                         @endif
                                     @endif
-                                    <a 
-                                        href="{{ route('post.show', $post->id) }}"
-                                        class="view text-primary hover:underline text-sm"
-                                        aria-label="View Post"
-                                    >
-                                        <i class="fa-solid fa-eye"></i> 
-                                    </a>
+                                                             <!-- Views -->
+                                                             <a href="{{ route('post.show', $post->id) }}" class="view flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Views">
+                                    <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </div>
+                                    <span>{{ $post->views ?? 0 }}</span>
+                                </a>
                                     <div class="flex justify-start gap-8 mt-2">
                                         <a 
                                             href="{{ route('post.show', $post->id) }}#comments"
@@ -186,7 +186,8 @@
     .view{
         width: 187px;
     position: relative;
-    left: 76%;
+    left: 81%;
+    bottom: -36px;
     }
     .like-btn {
     position: absolute;

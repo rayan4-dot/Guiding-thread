@@ -15,7 +15,6 @@
     
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Remove: <script src="{{ asset('js/fetch.js') }}" defer></script> -->
     
     <script>
         tailwind.config = {
