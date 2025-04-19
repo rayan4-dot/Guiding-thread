@@ -13,8 +13,8 @@ class ProfileController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $posts = $user->posts()->with('user')->latest()->paginate(10); // Paginated, with user relation
-        $friends = User::getNonAdminUsers(); // Assuming this is a custom method in User model
+        $posts = $user->posts()->with('user')->latest()->paginate(10); 
+        $friends = User::getNonAdminUsers(); 
 
         return view('user.profile', compact('user', 'posts', 'friends'));
     }
@@ -28,7 +28,7 @@ class ProfileController extends Controller
                       ->get();
 
         $isOwnProfile = Auth::check() && Auth::user()->id === $user->id;
-        $isFriend = !$isOwnProfile; // Placeholder until you implement real friend logic
+        $isFriend = !$isOwnProfile; 
 
         return view('user.public-profile', compact('user', 'friends', 'isOwnProfile', 'isFriend'));
     }
@@ -47,7 +47,7 @@ class ProfileController extends Controller
             /** @var User $user */
             $user = Auth::user();
 
-            // Handle profile picture upload
+
             if ($request->hasFile('profile_picture')) {
                 if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
                     Storage::disk('public')->delete($user->profile_picture);
@@ -56,7 +56,7 @@ class ProfileController extends Controller
                 $user->profile_picture = $path;
             }
 
-            // Handle cover photo upload
+
             if ($request->hasFile('cover_photo')) {
                 if ($user->cover_photo && Storage::disk('public')->exists($user->cover_photo)) {
                     Storage::disk('public')->delete($user->cover_photo);
@@ -65,7 +65,7 @@ class ProfileController extends Controller
                 $user->cover_photo = $path;
             }
 
-            // Update user details
+
             $user->update([
                 'name' => $request->input('name'),
                 'username' => $request->input('username'),

@@ -9,7 +9,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $posts = Post::with('user')->latest()->take(10)->get(); // Fetch latest 10 posts from all users
+        $posts = Post::with('user')->latest()->paginate(10);
         return view('user.home', compact('posts'));
     }
 
