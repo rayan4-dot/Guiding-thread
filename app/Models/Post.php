@@ -35,7 +35,10 @@ public function reactions()
 {
     return $this->hasMany(Reaction::class);
 }
-
+public function comments()
+{
+    return $this->hasMany(Comment::class)->latest();
+}
 public function likes()
 {
     return $this->reactions();
