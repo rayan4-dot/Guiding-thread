@@ -3,17 +3,24 @@
     <!-- Container for scrollable content -->
     <div class="flex flex-col h-full">
 
-        <!-- Sticky Search Bar -->
-        <div class="p-4 border-b border-dark-border bg-black sticky top-0 z-10">
-            <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-focus-within:text-primary transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-                <input type="text" placeholder="Rechercher" class="pl-12 pr-4 py-3 bg-dark-lighter text-white rounded-full w-full focus:outline-none focus:ring-1 focus:ring-primary focus:bg-black transition-all duration-200" aria-label="Search">
-            </div>
+     <!-- Sticky Search Bar -->
+<div class="p-4 border-b border-dark-border bg-black sticky top-0 z-10">
+    <form action="{{ route('search.index') }}" method="GET" class="relative group">
+        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 group-focus-within:text-primary transition-colors duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
         </div>
+        <input 
+            type="text" 
+            name="query" 
+            placeholder="Search posts, users, or #hashtags..." 
+            value="{{ request('query') }}"
+            class="pl-12 pr-4 py-3 bg-dark-lighter text-white rounded-full w-full focus:outline-none focus:ring-1 focus:ring-primary focus:bg-black transition-all duration-200" 
+            aria-label="Search"
+        >
+    </form>
+</div>
 
         <!-- Scrollable area -->
         <div class="overflow-y-auto px-4 py-6 space-y-6 flex-1">

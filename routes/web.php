@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\SearchController;
 
 
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
@@ -64,6 +65,10 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/update-password', function () {
         return view('user.update-password');
     })->name('user.update-password');
+    Route::get('/search', [SearchController::class, 'index'])->name('search.index');
+
+
+
     Route::post('/posts/{post}/comments', [CommentController::class, 'storeComment'])->name('posts.comments.store');
 Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/posts/{post}/like', [PostController::class, 'like'])->name('posts.like');
