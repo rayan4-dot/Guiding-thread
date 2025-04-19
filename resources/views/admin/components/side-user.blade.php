@@ -19,7 +19,7 @@
             </div>
             <span class="text-lg font-medium hidden md:inline">Accueil</span>
         </a>
-        <a href="{{ route('user.explore') }}" class="{{ request()->routeIs('user.explore') ? 'bg-dark-lighter text-primary' : 'text-gray-300 hover:bg-dark-hover hover:text-white' }} flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group">
+        <a href="{{ route('explore') }}" class="{{ request()->routeIs('explore') ? 'bg-dark-lighter text-primary' : 'text-gray-300 hover:bg-dark-hover hover:text-white' }} flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group">
             <div class="flex items-center justify-center w-10 h-10 rounded-full group-hover:bg-opacity-10 group-hover:bg-white transition-all duration-200">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14"></path>
