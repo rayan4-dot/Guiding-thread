@@ -130,6 +130,12 @@
         @empty
             <p class="p-4 text-gray-400 text-center">No posts yet.</p>
         @endforelse
+
+
+              <!-- Pagination Links -->
+              <div class="p-4">
+            {{ $posts->links() }}
+        </div>
     </section>
 <!-- media modal-->
 
