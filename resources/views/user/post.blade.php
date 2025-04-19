@@ -38,10 +38,7 @@
                                 </button>
                                 <div id="options-{{ $post->id }}"
                                      class="hidden absolute right-0 mt-2 w-48 bg-black border border-gray-800 rounded-md shadow-lg z-10">
-                                    <a href="/post/{{ $post->id }}/edit" class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white">
-                                        <i class="fa-solid fa-pen-to-square mr-2"></i> Edit Post
-                                    </a>
-                                    <button onclick="confirmDelete({{ $post->id }})"
+                                    <button onclick="document.getElementById('confirm-delete-modal').classList.remove('hidden')"
                                             class="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-800">
                                         <i class="fa-solid fa-trash-can mr-2"></i> Delete Post
                                     </button>
@@ -202,39 +199,39 @@
 
         <!-- Comments section -->
         <section id="comments" class="p-4 bg-black">
-            <h2 class="text-lg font-bold mb-4">Comments ({{ $post->comments()->count() }})</h2>
+            <h2 class="text-lg font-bold mb-4 text-white">Comments ({{ $post->comments()->count() }})</h2>
             @forelse ($post->comments as $comment)
-                <div class="flex gap-3 mb-4" id="comment-{{ $comment->id }}">
+                <div class="flex gap-3 mb-4 bg-gray-950 border border-gray-950 rounded-lg p-4 hover:bg-gray-900 transition-colors duration-200" id="comment-{{ $comment->id }}">
                     <a href="/profile/{{ $comment->user->username }}" class="flex-shrink-0">
                         <img src="{{ $comment->user->profile_picture ? Storage::url($comment->user->profile_picture) : asset('images/default-profile.png') }}"
                              alt="{{ $comment->user->name }}"
                              class="w-10 h-10 rounded-full object-cover hover:opacity-90 transition-opacity">
                     </a>
                     <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <a href="/profile/{{ $comment->user->username }}" class="font-bold hover:underline">{{ $comment->user->name }}</a>
-                            <span class="text-gray-500 text-sm">{{ '@' . $comment->user->username }}</span>
-                            <span class="text-gray-500 text-sm">· {{ $comment->created_at->diffForHumans() }}</span>
+                        <div class="flex items-center gap-2 mb-2">
+                            <a href="/profile/{{ $comment->user->username }}" class="font-semibold text-white hover:underline">{{ $comment->user->name }}</a>
+                            <span class="text-gray-400 text-xs">{{ '@' . $comment->user->username }}</span>
+                            <span class="text-gray-400 text-xs">· {{ $comment->created_at->diffForHumans() }}</span>
                             @if (Auth::check() && Auth::id() === $comment->user_id)
                                 <form action="{{ route('comments.destroy', $comment) }}" method="POST" class="ml-auto">
                                     @csrf
                                     @method('DELETE')
                                     <button
                                         type="submit"
-                                        class="text-red-500 hover:text-red-700 text-sm"
+                                        class="text-red-500 hover:text-red-700 text-sm opacity-70 hover:opacity-100 transition-opacity"
                                         onclick="return confirm('Are you sure you want to delete this comment?')">
                                         <i class="fa-solid fa-trash-can"></i>
                                     </button>
                                 </form>
                             @endif
                         </div>
-                        <p class="text-white text-sm leading-relaxed mt-1">{{ nl2br(e($comment->contenu)) }}</p>
+                        <p class="text-gray-200 text-sm leading-relaxed">{{ nl2br(e($comment->contenu)) }}</p>
                     </div>
                 </div>
             @empty
-                <div class="py-12 text-center">
-                    <div class="w-16 h-16 bg-dark-hover/50 rounded-full flex items-center justify-center mx-auto mb-5">
-                        <i class="fa-regular fa-comment-dots text-2xl text-gray-400"></i>
+                <div class="py-12 text-center bg-gray-900/50 border border-gray-900 rounded-lg">
+                    <div class="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-5">
+                        <i class="fa-regular fa-comment-dots text-2xl text-red-400"></i>
                     </div>
                     <p class="text-gray-400 text-lg font-medium">No comments yet</p>
                     <p class="text-gray-500 mt-2">Be the first to share your thoughts on this post</p>
@@ -258,6 +255,8 @@
                             class="px-4 py-2 border border-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors">
                         Cancel
                     </button>
+                    <form action="{{ route('post.destroy', $post->id) }}" method="POST"
+                          onsubmit="console.log('Delete form submitted for post {{ $post->id }}')">
                         @csrf
                         @method('DELETE')
                         <button type="submit"
@@ -291,11 +290,6 @@
         </div>
 
         <script>
-            function confirmDelete(postId) {
-                const modal = document.getElementById('confirm-delete-modal');
-                modal.classList.remove('hidden');
-            }
-
             function openMediaModal(src, type) {
                 const modal = document.getElementById('mediaModal');
                 const img = document.getElementById('mediaModalImg');

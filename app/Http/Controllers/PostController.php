@@ -11,6 +11,7 @@ use App\Models\Hashtag;
 
 class PostController extends Controller
 {
+
     public function like(Post $post)
     {
         $user = Auth::user();
@@ -28,6 +29,7 @@ class PostController extends Controller
             ]);
         }
     
+
         return response()->noContent();
     }
     
@@ -101,7 +103,7 @@ class PostController extends Controller
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($id, Request $request)
     {
         $post = Post::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
 
@@ -118,7 +120,23 @@ class PostController extends Controller
         }
 
         $post->delete();
+        if ($request->wantsJson() || $request->header('X-Requested-With') === 'XMLHttpRequest') {
+            return response()->json([
+                'success' => true,
+                'message' => 'Post deleted successfully',
+                'post_id' => $id,
+            ]);
+        }
+        
+        // $redirectUrl = $request->headers->get('referer') ? url()->previous() : route('home');
+        // return response()->json([
+        //     'success' => true,
+        //     'message' => 'Post deleted successfully',
+        //     'post_id' => $id,
+        //     'redirect' => $redirectUrl,
+        // ]);
 
-        return redirect()->route('home')->with('success', 'Post deleted successfully.');
+        return redirect()->route('user.home')->with('success', 'Post deleted successfully.');
+
     }
 }
