@@ -12,10 +12,10 @@ class PublicProfileController extends Controller
         $user = User::where('username', $username)->firstOrFail();
         $posts = $user->posts()
             ->with(['user', 'comments', 'likes'])
-            ->withCount(['likes', 'comments'])
             ->latest()
             ->paginate(10);
+        $is_following = auth()->check() && auth()->id() !== $user->id ? auth()->user()->isFollowing($user) : false;
 
-        return view('user.public-profile', compact('user', 'posts'));
+        return view('user.public-profile', compact('user', 'posts', 'is_following'));
     }
 }

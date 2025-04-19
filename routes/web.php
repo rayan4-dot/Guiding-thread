@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\FollowController;
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
@@ -65,6 +66,8 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'storeComment'])->name('posts.comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/posts/{post}/like', [PostController::class, 'like'])->name('posts.like');
+    Route::post('/follow/{user}', [FollowController::class, 'follow'])->name('follow');
+    Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->name('unfollow');
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('post.destroy');
 });
