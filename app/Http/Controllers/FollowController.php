@@ -21,15 +21,15 @@ class FollowController extends Controller
         $existingConnection = Auth::user()->connections()->where('friend_id', $user->id)->first();
 
         if ($existingConnection) {
-            return redirect()->back()->with('error', 'Already following.');
+            return redirect()->back()->with('error', 'Follow request already sent or you are already following.');
         }
 
         Auth::user()->connections()->create([
             'friend_id' => $user->id,
-            'status' => 'accepted', // Change to 'pending' if approval needed
+            'status' => 'pending', // Now pending
         ]);
 
-        return redirect()->route('public-profile.show', $user->username)->with('success', 'Followed successfully.');
+        return redirect()->route('public-profile.show', $user->username)->with('success', 'Follow request sent.');
     }
 
     public function unfollow(Request $request, User $user)

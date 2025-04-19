@@ -67,6 +67,10 @@
                                     Unfollow
                                 </button>
                             </form>
+                        @elseif(auth()->user()->hasPendingFollow($user))
+                            <button class="bg-gray-500 text-white font-bold px-4 py-2 rounded-full cursor-not-allowed text-sm" disabled title="Follow request pending">
+                                Pending
+                            </button>
                         @else
                             <form action="{{ route('follow', $user) }}" method="POST">
                                 @csrf

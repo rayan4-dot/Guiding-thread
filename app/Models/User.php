@@ -73,5 +73,12 @@ class User extends Authenticatable
             ->where('status', 'accepted')
             ->exists();
     }
+    public function hasPendingFollow($user)
+    {
+        return $this->connections()
+            ->where('friend_id', $user->id)
+            ->where('status', 'pending')
+            ->exists();
+    }
 }
 
