@@ -97,17 +97,23 @@
                                     </div>
                                 @endif
                             @endif
-                            <a href="{{ route('post.show', $post->id) }}" class="view block text-primary hover:underline text-sm mt-2" aria-label="View Post">
-                                <i class="fa-solid fa-eye"></i>
-                            </a>
+                                                       <!-- Views -->
+                                                       <a href="{{ route('post.show', $post->id) }}" class="view flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Views">
+                                    <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </div>
+                                    <span>{{ $post->views ?? 0 }}</span>
+                                </a>
                         </div>
                         <div class="flex justify-start gap-8">
+                            <a href="{{ route('post.show', $post->id) }}#comments">
     <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
         <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
             <i class="fa-regular fa-comment"></i>
         </div>
         <span>{{ $post->comments()->count() }}</span>
     </button>
+    </a>
 
     <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
         @csrf
@@ -178,7 +184,8 @@
 .view {
     width: 187px;
     position: relative;
-    left: 81%;}
+    left: 81%;
+    bottom: -36px;}
 </style>
 
 

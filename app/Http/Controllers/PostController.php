@@ -37,6 +37,7 @@ class PostController extends Controller
     {
         $post = Post::with('user')->findOrFail($id);
         $post->load('comments.user');
+        $post->increment('views');
         return view('user.post', compact('post'));
     }
 
