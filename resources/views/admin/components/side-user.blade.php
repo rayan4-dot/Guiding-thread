@@ -1,4 +1,4 @@
-<aside class="w-20 md:w-64 h-screen sticky top-0 flex flex-col p-4 space-y-4 bg-black text-white border-r border-dark-border z-20" x-data="postModal" @keydown.escape="postModalOpen = false">
+<aside class="w-20 md:w-64 h-screen sticky top-0 flex flex-col p-4 space-y-4 bg-black text-white border-r border-dark-border z-20">
     <!-- Logo -->
     <div class="p-2 mb-6">
         <a href="{{ route('user.home') }}" class="flex items-center justify-center md:justify-start">
@@ -45,7 +45,6 @@
         </a>
     </nav>
 
-
     <!-- Post Button -->
     <div class="mt-6">
         <button id="openPostModal" class="w-full bg-primary hover:bg-secondary text-white font-bold py-3 px-4 rounded-full transition-colors duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-primary/20">
@@ -62,7 +61,7 @@
             <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : 'https://i.pravatar.cc/100' }}" alt="Avatar" class="w-10 h-10 rounded-full border-2 border-dark-border">
             <div class="hidden md:block overflow-hidden">
                 <p class="font-bold text-sm truncate">{{ Auth::user()->name }}</p>
-                <p class="text-gray-400 text-sm truncate">{{'@' . Auth::user()->username }}</p>
+                <p class="text-gray-400 text-sm truncate">{{ '@' . Auth::user()->username }}</p>
             </div>
             <div class="hidden md:block ml-auto">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -70,7 +69,7 @@
                 </svg>
             </div>
         </div>
-        <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-dark-lighter rounded-lg shadow-lg z-10">
+        <div id="dropdownMenu" class="hidden absolute right-0 bottom-full mb-2 w-48 bg-dark-lighter rounded-lg shadow-lg z-10">
             <a href="{{ route('user.settings') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-hover hover:text-white rounded-t-lg">Settings</a>
             <a href="{{ route('logout') }}" class="block px-4 py-2 text-sm text-gray-300 hover:bg-dark-hover hover:text-white rounded-b-lg" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
@@ -82,9 +81,8 @@
     <!-- Background Overlay -->
     <div id="postModalOverlay" class="fixed inset-0 z-40 bg-black/70 hidden"></div>
 
-
-   <!-- Post Creation Modal -->
-   <div id="postModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
+    <!-- Post Creation Modal -->
+    <div id="postModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 hidden">
         <div class="relative bg-dark-lighter w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden">
             <div class="bg-gradient-to-r from-primary/20 to-secondary/20 h-2"></div>
             <div class="p-4">
@@ -95,7 +93,7 @@
                     <div class="text-lg font-bold text-gray-300">Create Post</div>
                     <div class="w-8"></div>
                 </div>
-                <form id="postForm" action="{{ route('posts.store') }}" method="POST" class="flex flex-col">
+                <form id="postForm" action="{{ route('posts.store') }}" method="POST" enctype="multipart/form-data" class="flex flex-col">
                     @csrf
                     <div class="flex gap-4 mb-4">
                         <img src="{{ Auth::user()->profile_picture ? Storage::url(Auth::user()->profile_picture) : asset('images/default-profile.png') }}" alt="Profile Picture" class="w-10 h-10 rounded-full ring-2 ring-primary/40">
@@ -122,6 +120,3 @@
 
     <script src="{{ asset('js/fetch.js') }}" defer></script>
 </aside>
-
-
-
