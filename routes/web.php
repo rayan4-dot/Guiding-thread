@@ -3,28 +3,46 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\PostController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\CommentController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\PublicProfileController;
 use App\Http\Controllers\FollowController;
+use App\Http\Controllers\SearchController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\AdminPostController;
+use App\Http\Controllers\PostController;
+
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\Admin\DashboardController;
+
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('Admin.dashboard');
-    })->name('dashboard');
+    // Route::get('/dashboard', function () {
+    //     return view('Admin.dashboard');
+    // })->name('dashboard');
     Route::get('/notifications', function () {
         return view('Admin.notifications');
     })->name('notifications');
-    Route::get('/posts', function () {
-        return view('Admin.posts');
-    })->name('posts');
-    Route::get('/users', function () {
-        return view('Admin.users');
-    })->name('users');
+    // Route::get('/posts', function () {
+    //     return view('Admin.posts');
+    // })->name('posts');
+    // Route::get('/users', function () {
+    //     return view('Admin.users');
+    // })->name('users');
+    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // User Management
+    Route::get('/users', [UserController::class, 'index'])->name('users');
+    Route::get('/users/{user}/details', [UserController::class, 'details'])->name('users.details');
+    Route::patch('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+
+    // Post Management
+    Route::get('/posts', [AdminPostController::class, 'index'])->name('posts');
+    Route::get('/posts/{post}/details', [AdminPostController::class, 'details'])->name('posts.details'); // Updated to AdminPostController
+    Route::delete('/posts/{post}', [AdminPostController::class, 'destroy'])->name('posts.destroy');
+
 });
 
 // Authenticated User Routes
@@ -44,6 +62,9 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/friends', function () {
         return view('user.friends');
     })->name('user.friends');
+    Route::get('/suspended', function () {
+        return view('auth.suspended');
+    })->name('suspended');
     Route::get('/settings', function () {
         return view('user.settings');
     })->name('user.settings');
