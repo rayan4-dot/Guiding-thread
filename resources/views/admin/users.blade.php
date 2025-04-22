@@ -255,7 +255,8 @@
     </div>
 
    <!-- User Details Modal -->
-<div class="modal" id="userDetailsModal">
+   <input type="checkbox" id="userDetailsModal" class="modal-toggle" />
+    <div class="modal">
         <div class="modal-box">
             <h3 class="font-bold text-lg">User Details</h3>
             <div class="py-4">
@@ -357,8 +358,10 @@
 
   
     async function viewUserDetails(userId) {
+        console.log('viewUserDetails called with userId:', userId);
         try {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+            console.log('CSRF token:', csrfToken);
             if (!csrfToken) {
                 throw new Error('CSRF token not found');
             }
@@ -371,11 +374,13 @@
                 }
             });
 
+            console.log('Response status:', response.status);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
 
             const user = await response.json();
+            console.log('User data:', user);
 
             if (user.error) {
                 throw new Error(user.error);
@@ -393,7 +398,10 @@
             document.getElementById('userJoined').textContent = user.created_at || 'N/A';
 
             // Show modal
-            document.getElementById('userDetailsModal').checked = true;
+            const modal = document.getElementById('userDetailsModal');
+            console.log('Modal element:', modal, 'Checked state before:', modal.checked);
+            modal.checked = true;
+            console.log('Checked state after:', modal.checked);
         } catch (error) {
             console.error('Error fetching user details:', error.message);
             alert(`Failed to load user details: ${error.message}`);

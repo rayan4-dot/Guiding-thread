@@ -117,16 +117,8 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
-        // Unchanged (kept dd() as per your provided code)
         try {
-            // dd([
-            //     'user' => $user->toArray(),
-            //     'user_exists' => $user->exists,
-            //     'user_id' => request()->route('user'),
-            //     'request_method' => request()->method(),
-            //     'csrf_token' => request()->header('X-CSRF-TOKEN'),
-            //     'auth_user' => auth()->user()?->toArray() ?? 'Guest'
-            // ]);
+
 
             if (!$user->exists) {
                 Log::warning('User not found for deletion', ['user_id' => request()->route('user')]);
