@@ -59,8 +59,9 @@ class AdminPostController extends Controller
 
     public function details(Post $post)
 {
+
     try {
-        // Parse media_path if it's JSON
+
         $mediaItems = [];
         if (is_string($post->media_path) && str_starts_with($post->media_path, '[')) {
             $parsed = json_decode($post->media_path, true);
