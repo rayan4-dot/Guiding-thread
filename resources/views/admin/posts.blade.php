@@ -254,86 +254,67 @@
 
 <!-- Post Details Modal -->
 <input type="checkbox" id="postDetailsModal" class="modal-toggle" />
-<div class="modal">
-  <div class="modal-box bg-base-200 max-w-3xl p-0 overflow-hidden">
-    <!-- Header with close button -->
-    <div class="p-4 border-b border-base-300 flex justify-between items-center">
-      <h3 class="font-bold text-lg">Post Details</h3>
-      <label for="postDetailsModal" class="btn btn-sm btn-circle">✕</label>
+<div class="modal" role="dialog">
+    <div class="modal-box w-11/12 max-w-5xl">
+        <h3 class="font-bold text-lg">Post Details</h3>
+        <div class="divider"></div>
+        <div class="flex flex-col md:flex-row gap-6">
+            <!-- Left: Media and Content -->
+            <div class="flex-1">
+                <div id="mediaContainer" class="flex overflow-x-auto space-x-4 p-2">
+                    <!-- Media will be populated here -->
+                </div>
+                <div class="mt-4">
+                    <p class="font-semibold">Content:</p>
+                    <p id="modalPostContent" class="text-sm"></p>
+                    <p class="font-semibold mt-2">Hashtags:</p>
+                    <p id="modalPostHashtags" class="text-sm"></p>
+                    <p class="font-semibold mt-2">Media Type:</p>
+                    <p id="modalMediaType" class="text-sm"></p>
+                </div>
+            </div>
+            <!-- Right: Author and Stats -->
+            <div class="w-full md:w-1/3">
+                <div class="flex items-center gap-4">
+                    <div class="avatar">
+                        <div class="w-12 rounded-full">
+                            <img id="modalAuthorAvatar" src="https://api.dicebear.com/6.x/avataaars/svg?seed=user" alt="Author Avatar" />
+                        </div>
+                    </div>
+                    <div>
+                        <p id="modalAuthorName" class="font-bold"></p>
+                        <p id="modalAuthorUsername" class="text-sm opacity-70"></p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="font-semibold">Status: <span id="modalPostStatus" class="badge badge-success"></span></p>
+                    <p class="font-semibold mt-2">Posted: <span id="modalPostDate" class="text-sm"></span></p>
+                    <p class="font-semibold mt-2">Engagement: <span id="modalPostEngagement" class="text-sm"></span></p>
+                    <p class="font-semibold mt-2">Comments: <span id="modalPostComments" class="text-sm"></span></p>
+                    <p class="font-semibold mt-2">Reach: <span id="modalPostReach" class="text-sm"></span></p>
+                </div>
+            </div>
+        </div>
+        <div class="divider"></div>
+        <h4 class="font-semibold">Comments</h4>
+        <div id="modalComments" class="space-y-4 max-h-64 overflow-y-auto">
+            <!-- Comments will be populated here -->
+        </div>
+        <div class="modal-action">
+            <label for="postDetailsModal" class="btn">Close</label>
+        </div>
     </div>
-    
-    <!-- Post content section -->
-    <div class="p-4">
-      <!-- Author info section -->
-      <div class="flex items-center gap-3 mb-4">
-        <div class="avatar">
-          <div class="w-12 h-12 rounded-full ring ring-primary ring-offset-base-100 ring-offset-1">
-            <img id="modalAuthorAvatar" src="" alt="Author Avatar" />
-          </div>
-        </div>
-        <div>
-          <h4 class="font-bold text-base" id="modalAuthorName"></h4>
-          <p class="text-xs opacity-70" id="modalAuthorUsername"></p>
-        </div>
-        <div class="ml-auto text-xs opacity-70" id="modalPostDate"></div>
-      </div>
-      
-      <!-- Post content -->
-      <div class="mb-4">
-        <p class="text-sm mb-3" id="modalPostContent"></p>
-        <p class="text-sm text-primary" id="modalPostHashtags"></p>
-      </div>
-      
-      <!-- Post media (if available) -->
-      <div class="mb-4 bg-base-300 rounded-lg p-2" id="mediaContainer">
-        <p class="text-xs mb-1"><span class="font-bold">Media Type:</span> <span id="modalMediaType"></span></p>
-        <!-- Media will be inserted here dynamically -->
-      </div>
-      
-      <!-- Engagement stats -->
-      <div class="flex justify-between items-center py-3 border-t border-b border-base-300">
-        <div class="flex items-center gap-2">
-          <span class="badge badge-primary" id="modalPostStatus"></span>
-        </div>
-        <div class="flex gap-4 text-sm">
-          <div class="flex items-center gap-1">
-            <i class="fa fa-eye"></i>
-            <span id="modalPostReach"></span> views
-          </div>
-          <div class="flex items-center gap-1">
-            <i class="fa fa-heart"></i>
-            <span id="modalPostEngagement"></span>
-          </div>
-          <div class="flex items-center gap-1">
-            <i class="fa fa-comment"></i>
-            <span id="modalPostComments"></span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Comments section -->
-      <div class="mt-4">
-        <h4 class="font-bold text-base mb-2">Comments</h4>
-        <div id="modalComments" class="space-y-3 max-h-60 overflow-y-auto p-2 bg-base-300 rounded-lg">
-          <!-- Comments will be inserted here -->
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 
 <!-- Media Zoom Modal -->
 <input type="checkbox" id="mediaZoomModal" class="modal-toggle" />
-<div class="modal">
-  <div class="modal-box bg-base-200 p-0 max-w-4xl">
-    <div class="p-2 border-b border-base-300 flex justify-between items-center">
-      <h3 class="font-bold text-lg">Media Preview</h3>
-      <label for="mediaZoomModal" class="btn btn-sm btn-circle">✕</label>
+<div class="modal" role="dialog">
+    <div class="modal-box w-11/12 max-w-5xl">
+        <div id="mediaZoomContent" class="flex justify-center items-center"></div>
+        <div class="modal-action">
+            <label for="mediaZoomModal" class="btn">Close</label>
+        </div>
     </div>
-    <div class="p-4 flex justify-center items-center">
-      <div id="mediaZoomContent" class="max-w-full max-h-[80vh]"></div>
-    </div>
-  </div>
 </div>
 @endsection
 
@@ -514,90 +495,89 @@
 
             const post = await response.json();
             console.log('Post data:', post);
-            console.log('Raw media_path:', post.media_path, 'Raw media_type:', post.media_type);
 
             if (post.error) {
                 throw new Error(post.error);
             }
 
-            // Parse media_path, handling /storage/ prefix and JSON
-            let mediaPath = post.media_path;
-            let mediaType = post.media_type;
-            if (typeof mediaPath === 'string' && mediaPath.includes('[{')) {
-                // Remove /storage/ prefix if present
-                mediaPath = mediaPath.replace(/^\/storage\//, '');
-                try {
-                    const parsed = JSON.parse(mediaPath);
-                    if (Array.isArray(parsed) && parsed[0]?.path) {
-                        mediaPath = parsed[0].path;
-                        mediaType = parsed[0].type === 'video' ? 'video/mp4' : parsed[0].type === 'image' ? 'image/jpeg' : mediaType;
-                        console.log('Parsed media:', { path: mediaPath, type: mediaType });
-                    }
-                } catch (e) {
-                    console.error('Failed to parse media_path JSON:', e.message);
-                    mediaPath = null;
-                }
-            } else if (mediaType === 'video') {
-                mediaType = 'video/mp4';
-                console.log('Normalized media_type to:', mediaType);
-            } else if (mediaType === 'image') {
-                mediaType = 'image/jpeg';
-                console.log('Normalized media_type to:', mediaType);
+            // Populate modal with null checks
+            const modalAuthorAvatar = document.getElementById('modalAuthorAvatar');
+            const modalAuthorName = document.getElementById('modalAuthorName');
+            const modalAuthorUsername = document.getElementById('modalAuthorUsername');
+            const modalPostStatus = document.getElementById('modalPostStatus');
+            const modalPostDate = document.getElementById('modalPostDate');
+            const modalPostEngagement = document.getElementById('modalPostEngagement');
+            const modalPostComments = document.getElementById('modalPostComments');
+            const modalPostReach = document.getElementById('modalPostReach');
+            const modalPostContent = document.getElementById('modalPostContent');
+            const modalPostHashtags = document.getElementById('modalPostHashtags');
+            const modalMediaType = document.getElementById('modalMediaType');
+
+            if (!modalAuthorName || !modalAuthorUsername || !modalPostContent) {
+                console.error('Modal elements missing:', {
+                    modalAuthorName: !!modalAuthorName,
+                    modalAuthorUsername: !!modalAuthorUsername,
+                    modalPostContent: !!modalPostContent
+                });
+                throw new Error('Modal elements not found');
             }
 
-            // Populate modal
-            document.getElementById('modalAuthorAvatar').src = post.user.profile_picture || 'https://api.dicebear.com/6.x/avataaars/svg?seed=user';
-            document.getElementById('modalAuthorName').textContent = post.user.name || 'N/A';
-            document.getElementById('modalAuthorUsername').textContent = post.user.username && post.user.username !== 'N/A' ? `@${post.user.username}` : 'N/A';
-            document.getElementById('modalPostStatus').textContent = post.status || 'Active';
-            document.getElementById('modalPostDate').textContent = post.created_at || 'N/A';
-            document.getElementById('modalPostEngagement').textContent = `${post.reactions_count || 0} Likes`;
-            document.getElementById('modalPostComments').textContent = `${post.comments_count || 0} Comments`;
-            document.getElementById('modalPostReach').textContent = post.views || 0;
-            document.getElementById('modalPostContent').textContent = post.content || 'N/A';
-            document.getElementById('modalPostHashtags').textContent = post.hashtags || 'None';
-            document.getElementById('modalMediaType').textContent = mediaType || 'N/A';
+            modalAuthorAvatar.src = post.user.profile_picture || 'https://api.dicebear.com/6.x/avataaars/svg?seed=user';
+            modalAuthorName.textContent = post.user.name || 'N/A';
+            modalAuthorUsername.textContent = post.user.username && post.user.username !== 'N/A' ? `@${post.user.username}` : 'N/A';
+            modalPostStatus.textContent = post.status || 'Active';
+            modalPostDate.textContent = post.created_at || 'N/A';
+            modalPostEngagement.textContent = `${post.reactions_count || 0} Likes`;
+            modalPostComments.textContent = `${post.comments_count || 0} Comments`;
+            modalPostReach.textContent = post.views || 0;
+            modalPostContent.textContent = post.content || 'N/A';
+            modalPostHashtags.textContent = post.hashtags || 'None';
+            modalMediaType.textContent = post.media.length ? post.media.map(m => m.type).join(', ') : 'N/A';
 
             // Handle media
             const mediaContainer = document.getElementById('mediaContainer');
-            mediaContainer.querySelectorAll('img, video').forEach(el => el.remove());
-            if (mediaPath && mediaType) {
-                console.log('Attempting to render media:', { path: mediaPath, type: mediaType });
-                if (mediaType.startsWith('image/')) {
-                    const img = document.createElement('img');
-                    img.src = mediaPath;
-                    img.alt = 'Post Media';
-                    img.className = 'w-[200px] h-auto rounded-lg cursor-pointer';
-                    img.onerror = () => console.error('Failed to load image:', mediaPath);
-                    img.onload = () => console.log('Image loaded successfully:', mediaPath);
-                    img.onclick = () => {
-                        console.log('Image clicked, opening zoom modal');
-                        const zoomContent = document.getElementById('mediaZoomContent');
-                        zoomContent.innerHTML = `<img src="${mediaPath}" alt="Post Media" class="max-w-full max-h-[80vh] object-contain" />`;
-                        document.getElementById('mediaZoomModal').checked = true;
-                    };
-                    mediaContainer.appendChild(img);
-                } else if (mediaType.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.src = mediaPath;
-                    video.controls = true;
-                    video.className = 'w-[200px] h-auto rounded-lg cursor-pointer';
-                    video.onerror = () => console.error('Failed to load video:', mediaPath);
-                    video.onloadeddata = () => console.log('Video loaded successfully:', mediaPath);
-                    video.onclick = () => {
-                        console.log('Video clicked, opening zoom modal');
-                        const zoomContent = document.getElementById('mediaZoomContent');
-                        zoomContent.innerHTML = `<video src="${mediaPath}" controls class="max-w-full max-h-[80vh] object-contain"></video>`;
-                        document.getElementById('mediaZoomModal').checked = true;
-                    };
-                    mediaContainer.appendChild(video);
-                } else {
-                    console.warn('Unsupported media type:', mediaType);
-                    mediaContainer.innerHTML += '<p class="text-xs text-error">Unsupported media type</p>';
-                }
+            mediaContainer.innerHTML = '';
+            if (post.media && post.media.length > 0) {
+                console.log('Attempting to render media:', post.media);
+                post.media.forEach((media, index) => {
+                    const mediaType = media.type;
+                    const mediaPath = media.path;
+                    if (mediaType.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = mediaPath;
+                        img.alt = `Post Media ${index + 1}`;
+                        img.className = 'w-[200px] h-auto rounded-lg cursor-pointer flex-shrink-0';
+                        img.onerror = () => console.error('Failed to load image:', mediaPath);
+                        img.onload = () => console.log('Image loaded successfully:', mediaPath);
+                        img.onclick = () => {
+                            console.log('Image clicked, opening zoom modal');
+                            const zoomContent = document.getElementById('mediaZoomContent');
+                            zoomContent.innerHTML = `<img src="${mediaPath}" alt="Post Media" class="max-w-full max-h-[80vh] object-contain" />`;
+                            document.getElementById('mediaZoomModal').checked = true;
+                        };
+                        mediaContainer.appendChild(img);
+                    } else if (mediaType.startsWith('video/')) {
+                        const video = document.createElement('video');
+                        video.src = mediaPath;
+                        video.controls = true;
+                        video.className = 'w-[200px] h-auto rounded-lg cursor-pointer flex-shrink-0';
+                        video.onerror = () => console.error('Failed to load video:', mediaPath);
+                        video.onloadeddata = () => console.log('Video loaded successfully:', mediaPath);
+                        video.onclick = () => {
+                            console.log('Video clicked, opening zoom modal');
+                            const zoomContent = document.getElementById('mediaZoomContent');
+                            zoomContent.innerHTML = `<video src="${mediaPath}" controls class="max-w-full max-h-[80vh] object-contain"></video>`;
+                            document.getElementById('mediaZoomModal').checked = true;
+                        };
+                        mediaContainer.appendChild(video);
+                    } else {
+                        console.warn('Unsupported media type:', mediaType);
+                        mediaContainer.innerHTML += '<p class="text-xs text-error flex-shrink-0">Unsupported media type</p>';
+                    }
+                });
             } else {
-                console.warn('No media available:', { media_path: mediaPath, media_type: mediaType });
-                mediaContainer.innerHTML += '<p class="text-xs text-warning">No media available</p>';
+                console.warn('No media available');
+                mediaContainer.innerHTML = '<p class="text-xs text-warning flex-shrink-0">No media available</p>';
             }
 
             // Populate comments
