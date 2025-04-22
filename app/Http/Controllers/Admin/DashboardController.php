@@ -51,7 +51,7 @@ class DashboardController extends Controller
             'connections' => fn($query) => $query->where('status', 'accepted')
         ])
             ->orderByDesc('posts_count')
-            ->take(5)
+            ->take(3)
             ->get();
 
         // Recent Activity
@@ -71,7 +71,7 @@ class DashboardController extends Controller
         $newPosts = Post::with('user')
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($post) {
                 return [
@@ -88,7 +88,7 @@ class DashboardController extends Controller
             ->withCount(['reactions', 'comments'])
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->orderByRaw('(reactions_count + comments_count) DESC')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($post) {
                 return [
@@ -104,7 +104,7 @@ class DashboardController extends Controller
         $newComments = Comment::with('user', 'post')
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->orderBy('created_at', 'desc')
-            ->take(5)
+            ->take(3)
             ->get()
             ->map(function ($comment) {
                 return [
@@ -119,7 +119,7 @@ class DashboardController extends Controller
         // Combine and sort by timestamp
         $activities = collect($newPosts)->merge($newComments)->merge($highEngagementPosts)
             ->sortByDesc('timestamp')
-            ->take(5)
+            ->take(3)
             ->values();
 
         return $activities;

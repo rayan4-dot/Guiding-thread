@@ -155,7 +155,6 @@
                             <div class="badge {{ $activity['type'] === 'post' ? 'badge-info' : ($activity['type'] === 'comment' ? 'badge-accent' : 'badge-success') }}">
                                 {{ ucfirst($activity['type']) }}
                             </div>
-                            <a href="{{ route('admin.posts.show', $activity['post_id']) }}" class="btn btn-xs btn-outline">View Post</a>
                         </div>
                     </div>
                 </div>

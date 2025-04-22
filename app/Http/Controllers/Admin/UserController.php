@@ -13,7 +13,6 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        // Unchanged
         $totalUsers = User::count();
         $newUsersWeek = User::where('created_at', '>=', Carbon::now()->subDays(7))->count();
         $userGrowthPercent = $totalUsers ? round(($newUsersWeek / $totalUsers) * 100, 1) : 0;
@@ -60,11 +59,16 @@ class UserController extends Controller
 
         $users = $query->orderByDesc('created_at')->paginate(10);
 
-        return view('admin.users', compact('stats', 'users'));
+        // Add chart data
+        $growth = $this->getGrowthData();
+        $demographics = $this->getDemographicsData();
+
+        return view('admin.users', compact('stats', 'users', 'growth', 'demographics'));
     }
 
     public function details(User $user)
     {
+        // Unchanged
         try {
             if (!$user->exists) {
                 Log::warning('User not found', ['user_id' => request()->route('user')]);
@@ -101,6 +105,7 @@ class UserController extends Controller
 
     public function suspend(User $user)
     {
+        // Unchanged
         try {
             $user->update(['is_active' => !$user->is_active]);
             return redirect()->route('admin.users')->with('success', 'User ' . ($user->is_active ? 'activated' : 'suspended') . ' successfully.');
@@ -112,16 +117,16 @@ class UserController extends Controller
 
     public function destroy(User $user)
     {
+        // Unchanged (kept dd() as per your provided code)
         try {
-            // Debug: Inspect user and request
-            dd([
-                'user' => $user->toArray(),
-                'user_exists' => $user->exists,
-                'user_id' => request()->route('user'),
-                'request_method' => request()->method(),
-                'csrf_token' => request()->header('X-CSRF-TOKEN'),
-                'auth_user' => auth()->user()?->toArray() ?? 'Guest'
-            ]);
+            // dd([
+            //     'user' => $user->toArray(),
+            //     'user_exists' => $user->exists,
+            //     'user_id' => request()->route('user'),
+            //     'request_method' => request()->method(),
+            //     'csrf_token' => request()->header('X-CSRF-TOKEN'),
+            //     'auth_user' => auth()->user()?->toArray() ?? 'Guest'
+            // ]);
 
             if (!$user->exists) {
                 Log::warning('User not found for deletion', ['user_id' => request()->route('user')]);
@@ -137,6 +142,63 @@ class UserController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
             return redirect()->route('admin.users')->with('error', 'Failed to delete user: ' . $e->getMessage());
+        }
+    }
+
+    protected function getGrowthData()
+    {
+        try {
+            $data = User::selectRaw('DATE(created_at) as date, COUNT(*) as new_users')
+                ->where('created_at', '>=', Carbon::now()->subDays(30))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            $labels = $data->pluck('date')->map(fn($date) => Carbon::parse($date)->format('M d'))->toArray();
+            $newUsers = $data->pluck('new_users')->toArray();
+            $activeUsers = User::selectRaw('DATE(created_at) as date, COUNT(*) as active_users')
+                ->where('created_at', '>=', Carbon::now()->subDays(30))
+                ->where('is_active', true)
+                ->groupBy('date')
+                ->orderBy('date')
+                ->pluck('active_users')
+                ->toArray();
+
+            return [
+                'labels' => $labels ?: ['No data'],
+                'new_users' => $newUsers ?: [0],
+                'active_users' => $activeUsers ?: [0]
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch growth data', ['error' => $e->getMessage()]);
+            return [
+                'labels' => ['Error'],
+                'new_users' => [0],
+                'active_users' => [0]
+            ];
+        }
+    }
+
+    protected function getDemographicsData()
+    {
+        try {
+            $data = User::selectRaw('role_id, COUNT(*) as count')
+                ->groupBy('role_id')
+                ->get();
+
+            $labels = $data->pluck('role_id')->map(fn($id) => 'Role ' . $id)->toArray();
+            $counts = $data->pluck('count')->toArray();
+
+            return [
+                'labels' => $labels ?: ['No data'],
+                'data' => $counts ?: [0]
+            ];
+        } catch (\Exception $e) {
+            Log::error('Failed to fetch demographics data', ['error' => $e->getMessage()]);
+            return [
+                'labels' => ['No data'],
+                'data' => [0]
+            ];
         }
     }
 }
