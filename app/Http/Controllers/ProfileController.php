@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Models\User;
 use App\Models\Post;
 
@@ -76,7 +77,7 @@ class ProfileController extends Controller
 
             return redirect()->route('user.profile')->with('success', 'Profile updated successfully');
         } catch (\Exception $e) {
-            \Log::error('Profile update failed: ' . $e->getMessage());
+            Log::error('Profile update failed: ' . $e->getMessage());
             return redirect()->route('user.profile')->with('error', 'Failed to update profile: ' . $e->getMessage());
         }
     }
@@ -95,7 +96,7 @@ class ProfileController extends Controller
 
             return redirect()->route('user.profile')->with('success', 'Profile picture removed successfully');
         } catch (\Exception $e) {
-            \Log::error('Profile picture removal failed: ' . $e->getMessage());
+            Log::error('Profile picture removal failed: ' . $e->getMessage());
             return redirect()->route('user.profile')->with('error', 'Failed to remove profile picture: ' . $e->getMessage());
         }
     }
@@ -114,7 +115,7 @@ class ProfileController extends Controller
 
             return redirect()->route('user.profile')->with('success', 'Cover photo removed successfully');
         } catch (\Exception $e) {
-            \Log::error('Cover photo removal failed: ' . $e->getMessage());
+            Log::error('Cover photo removal failed: ' . $e->getMessage());
             return redirect()->route('user.profile')->with('error', 'Failed to remove cover photo: ' . $e->getMessage());
         }
     }

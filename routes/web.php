@@ -49,6 +49,7 @@ Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function (
 // Authenticated User Routes
 Route::middleware(['auth', 'is_user'])->group(function () {
     Route::post('/user/update-password', [AuthController::class, 'updatePassword'])->name('user.update-password');
+    Route::delete('/user/delete-account', [AuthController::class, 'deleteAccount'])->name('user.delete-account');
 
     Route::get('/home', [HomeController::class, 'index'])->name('user.home');
     Route::get('/explore', [ExploreController::class, 'index'])->name('explore');

@@ -65,7 +65,28 @@
 </form>
         </div>
 
-
+<!-- Delete Account Section -->
+<div>
+    <h3 class="text-md font-semibold text-gray-400 mb-4">Delete Account</h3>
+    <p class="text-gray-300 text-sm mb-4">Once you delete your account, there is no going back. Please be certain.</p>
+    <form action="{{ route('user.delete-account') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete your account? This action cannot be undone.');">
+        @csrf
+        @method('DELETE') 
+        @if (session('error'))
+            <div class="text-red-500 text-sm mb-4">{{ session('error') }}</div>
+        @endif
+        <div>
+            <label for="password" class="block text-sm font-medium text-gray-400">Confirm Password</label>
+            <input type="password" name="password" id="password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            @error('password')
+                <div class="text-red-500 text-sm">{{ $message }}</div>
+            @enderror
+        </div>
+        <div class="mt-4">
+            <button type="submit" class="bg-red-600 text-white font-bold px-4 py-2 rounded-full hover:bg-red-700 transition-colors">Delete Account</button>
+        </div>
+    </form>
+</div>
     </section>
 </main>
 @endsection

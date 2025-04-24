@@ -15,7 +15,7 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Stats
+
         $totalUsers = User::count();
         $newUsersWeek = User::where('created_at', '>=', Carbon::now()->subDays(7))->count();
         $userGrowthPercent = $totalUsers ? round(($newUsersWeek / $totalUsers) * 100, 1) : 0;
@@ -45,7 +45,6 @@ class DashboardController extends Controller
             'top_hashtag' => $topHashtag,
         ];
 
-        // Top Users
         $topUsers = User::withCount([
             'posts',
             'connections' => fn($query) => $query->where('status', 'accepted')
@@ -54,10 +53,9 @@ class DashboardController extends Controller
             ->take(3)
             ->get();
 
-        // Recent Activity
         $recentActivities = $this->getRecentActivities();
 
-        // Chart Data
+
         $chartData = $this->getChartData();
 
         return view('admin.dashboard', compact('stats', 'topUsers', 'recentActivities', 'chartData'));
@@ -67,7 +65,7 @@ class DashboardController extends Controller
     {
         $activities = [];
 
-        // New Posts
+
         $newPosts = Post::with('user')
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->orderBy('created_at', 'desc')
@@ -83,7 +81,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // High Engagement Posts (based on reactions + comments)
+
         $highEngagementPosts = Post::with('user')
             ->withCount(['reactions', 'comments'])
             ->where('created_at', '>=', Carbon::now()->subDays(7))
@@ -100,7 +98,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // New Comments
+
         $newComments = Comment::with('user', 'post')
             ->where('created_at', '>=', Carbon::now()->subDays(7))
             ->orderBy('created_at', 'desc')
@@ -116,7 +114,7 @@ class DashboardController extends Controller
                 ];
             });
 
-        // Combine and sort by timestamp
+
         $activities = collect($newPosts)->merge($newComments)->merge($highEngagementPosts)
             ->sortByDesc('timestamp')
             ->take(3)
@@ -139,7 +137,7 @@ class DashboardController extends Controller
                 $labels = collect(range(0, (int)$range - 1))->map(fn($i) => $start->copy()->addDays($i)->format('M d'));
             }
 
-            // Activity Data
+
             $posts = Post::selectRaw("DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count")
                 ->where('created_at', '>=', $start)
                 ->groupBy('date')
@@ -165,7 +163,7 @@ class DashboardController extends Controller
                 'users' => $labels->map(fn($label, $i) => $users[$start->copy()->addDays($i)->format('Y-m-d')] ?? 0),
             ];
 
-            // Content Types
+
             $content = [
                 Post::where('media_type', 'image')->count(),
                 Post::where('media_type', 'video')->count(),
@@ -173,14 +171,14 @@ class DashboardController extends Controller
                 Post::where('media_type', 'none')->count(),
             ];
 
-            // Engagement
+
             $engagement = [
                 Reaction::count(),
                 Comment::count(),
                 Post::sum('views'),
             ];
 
-            // Top Hashtags
+
             $tags = Hashtag::withCount('posts')
                 ->orderByDesc('posts_count')
                 ->take(5)
