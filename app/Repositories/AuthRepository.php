@@ -16,6 +16,14 @@ class AuthRepository implements AuthRepositoryInterface
 {
     public function register(array $data)
     {
+        $role = Role::where('role', 'user')->first();
+
+
+
+        if (!$role) {
+            throw new \Exception("Role 'user' not found in roles table");
+        }
+
         $user = User::create([
             'name'     => $data['name'],
             'email'    => $data['email'],
