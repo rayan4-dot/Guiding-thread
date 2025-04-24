@@ -44,3 +44,61 @@
         <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Se connecter</a>
     </p>
 @endsection
+
+
+@section('scripts')
+
+<script>
+document.querySelector('form').addEventListener('submit', function (e) {
+    const nameInput = document.querySelector('input[name="name"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const passwordInput = document.querySelector('input[name="password"]');
+    const confirmPasswordInput = document.querySelector('input[name="password_confirmation"]');
+
+    const nameRegex = /^[a-zA-ZÀ-ÿ\s\-]+$/;
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    let errors = [];
+
+    if (!nameRegex.test(nameInput.value)) {
+        errors.push("The name must contain only letters, spaces and hyphens.");
+    }
+
+    if (!emailRegex.test(emailInput.value)) {
+        errors.push("The email address is not valid.");
+    }
+
+    if (!passwordRegex.test(passwordInput.value)) {
+        errors.push("The password must contain at least one uppercase letter, one lowercase letter, one number, and be at least 8 characters long.");
+    }
+
+    if (passwordInput.value !== confirmPasswordInput.value) {
+        errors.push("The passwords do not match.");
+    }
+
+    if (errors.length > 0) {
+        e.preventDefault();
+
+        let errorDiv = document.createElement('div');
+        errorDiv.className = "bg-red-100 text-red-600 p-3 rounded mb-4";
+
+        let ul = document.createElement('ul');
+        ul.className = "list-disc list-inside text-sm";
+
+        errors.forEach(error => {
+            let li = document.createElement('li');
+            li.textContent = error;
+            ul.appendChild(li);
+        });
+
+        errorDiv.appendChild(ul);
+
+
+        let existingError = document.querySelector('form .bg-red-100');
+        if (existingError) existingError.remove();
+
+        document.querySelector('form').prepend(errorDiv);
+    }
+});
+</script>
