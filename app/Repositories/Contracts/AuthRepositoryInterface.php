@@ -9,4 +9,6 @@ interface AuthRepositoryInterface
     public function logout();
     public function forgotPassword(string $email);
     public function resetPassword(array $data);
+    public function updatePassword($user, string $newPassword);
+
 }

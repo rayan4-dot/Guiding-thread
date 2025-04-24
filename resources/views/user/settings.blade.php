@@ -31,31 +31,41 @@
         <div class="mb-8">
             <h3 class="text-md font-semibold text-gray-400 mb-4">Update Password</h3>
             <form action="{{ route('user.update-password') }}" method="POST" class="space-y-4">
-                @csrf
-                <div>
-                    <label for="current_password" class="block text-sm font-medium text-gray-400">Current Password</label>
-                    <input type="password" name="current_password" id="current_password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label for="new_password" class="block text-sm font-medium text-gray-400">New Password</label>
-                    <input type="password" name="new_password" id="new_password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <label for="confirm_password" class="block text-sm font-medium text-gray-400">Confirm New Password</label>
-                    <input type="password" name="confirm_password" id="confirm_password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                </div>
-                <div>
-                    <button type="submit" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-full hover:bg-blue-700 transition-colors">Update Password</button>
-                </div>
-            </form>
+    @csrf
+    @if (session('success'))
+        <div class="text-green-500 text-sm">{{ session('success') }}</div>
+    @endif
+    @if (session('error'))
+        <div class="text-red-500 text-sm">{{ session('error') }}</div>
+    @endif
+    <div>
+        <label for="current_password" class="block text-sm font-medium text-gray-400">Current Password</label>
+        <input type="password" name="current_password" id="current_password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        @error('current_password')
+            <div class="text-red-500 text-sm">{{ $message }}</div>
+        @enderror
+    </div>
+    <div>
+        <label for="new_password" class="block text-sm font-medium text-gray-400">New Password (minimum 6 characters)</label>
+        <input type="password" name="new_password" id="new_password" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        @error('new_password')
+            <div class="text-red-500 text-sm">{{ $message }}</div>
+        @enderror
+    </div>
+    <div>
+        <label for="new_password_confirmation" class="block text-sm font-medium text-gray-400">Confirm New Password</label>
+        <input type="password" name="new_password_confirmation" id="new_password_confirmation" class="w-full bg-gray-900 text-white border border-gray-700 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        @error('new_password_confirmation')
+            <div class="text-red-500 text-sm">{{ $message }}</div>
+        @enderror
+    </div>
+    <div>
+        <button type="submit" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-full hover:bg-blue-700 transition-colors">Update Password</button>
+    </div>
+</form>
         </div>
 
-        <!-- Forgot Password Section -->
-        <div>
-            <h3 class="text-md font-semibold text-gray-400 mb-2">Forgot Password?</h3>
-            <p class="text-gray-300 text-sm">If you have forgotten your password, you can reset it by clicking the link below.</p>
-            <a href="{{ route('password.request') }}" class="text-blue-500 hover:underline mt-2 block">Forgot Password</a>
-        </div>
+
     </section>
 </main>
 @endsection

@@ -45,8 +45,11 @@ Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function (
 
 });
 
+
 // Authenticated User Routes
 Route::middleware(['auth', 'is_user'])->group(function () {
+    Route::post('/user/update-password', [AuthController::class, 'updatePassword'])->name('user.update-password');
+
     Route::get('/home', [HomeController::class, 'index'])->name('user.home');
     Route::get('/explore', [ExploreController::class, 'index'])->name('explore');
     Route::get('/notifications', function () {
@@ -68,9 +71,6 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::get('/settings', function () {
         return view('user.settings');
     })->name('user.settings');
-    Route::get('/update-password', function () {
-        return view('user.update-password');
-    })->name('user.update-password');
     Route::get('/search', [SearchController::class, 'index'])->name('search.index');
     Route::post('/posts/{post}/comments', [CommentController::class, 'storeComment'])->name('posts.comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
@@ -93,5 +93,3 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
 Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email');
-Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])->name('password.reset');
-Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update');

@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\Contracts\AuthRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
 
 
 class AuthController extends Controller
@@ -125,5 +128,23 @@ class AuthController extends Controller
         }
 
         return redirect()->route('login')->with('success', 'Password reset successful.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        Log::error('Password Update Request:', $request->all());
+        $request->validate([
+            'current_password' => 'required',
+            'new_password' => 'required|min:6|confirmed',
+        ]);
+        $user = Auth::user();
+    
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'The current password is incorrect.']);
+        }
+    
+        $this->auth->updatePassword($user, $request->new_password);
+    
+        return back()->with('success', 'Password updated successfully.');
     }
 }
