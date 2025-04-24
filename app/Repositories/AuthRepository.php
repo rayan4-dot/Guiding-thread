@@ -90,4 +90,13 @@ class AuthRepository implements AuthRepositoryInterface
 
         return true;
     }
+
+    public function updatePassword($user, string $newPassword)
+{
+    $user->update([
+        'password' => Hash::make($newPassword),
+    ]);
+
+    return true;
+}
 }

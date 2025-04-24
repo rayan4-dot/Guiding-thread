@@ -26,9 +26,9 @@
             </a>
             <h2 class="text-lg font-bold text-white">{{ Auth::user()->name }}</h2>
         </div>
-        <button class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black" aria-label="Settings">
-           <a href="{{ route('user.settings') }}"> <i class="fa-solid fa-gear"></i></a>
-        </button>
+        <a href="{{ route('user.settings') }}" class="text-white hover:bg-dark-hover p-2 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black" aria-label="Settings">
+            <i class="fa-solid fa-gear"></i>
+        </a>
     </div>
 </header>
 
