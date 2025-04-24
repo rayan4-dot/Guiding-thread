@@ -47,8 +47,8 @@ class User extends Authenticatable
     public static function getNonAdminUsers()
     {
         return self::where('role_id', 2)
-                   ->where('id', '!=', auth()->id()) // Exclude the current user
-                   ->take(5) // Limit to 5 users for the "Friends" section
+                   ->where('id', '!=', auth()->id()) 
+                   ->take(5) 
                    ->get();
     }
 

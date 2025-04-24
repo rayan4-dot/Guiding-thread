@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('fetch.js loaded and running!');
     const currentUserId = window.currentUserId || null;
 
-    // Post Modal Handling
     const postModal = document.getElementById('postModal');
     if (postModal) {
         const openModalBtn = document.getElementById('openPostModal');
@@ -183,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Like Button Handling
+
     document.querySelectorAll('.like-btn').forEach(button => {
         button.addEventListener('click', async (event) => {
             event.preventDefault();
@@ -193,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const countSpan = button.querySelector('.like-count');
             const currentCount = parseInt(countSpan.textContent);
 
-            // Optimistic update
+
             isLiked = !isLiked;
             button.dataset.liked = isLiked;
             countSpan.textContent = isLiked ? currentCount + 1 : currentCount - 1;
@@ -215,7 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (error) {
                 console.error('Like error:', error);
-                // Revert optimistic update
+
                 isLiked = !isLiked;
                 button.dataset.liked = isLiked;
                 countSpan.textContent = isLiked ? currentCount + 1 : currentCount;
@@ -227,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Delete Post
+
     window.deletePost = async (postId) => {
         try {
             const response = await fetch(`/post/${postId}`, {
@@ -252,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    // Append New Post (simplified, unchanged logic)
+
     window.appendNewPost = (post) => {
         const container = document.getElementById('posts-container');
         if (!container) return;

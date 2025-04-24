@@ -18,19 +18,10 @@ use App\Http\Controllers\Admin\DashboardController;
 
 // Admin Routes
 Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function () {
-    // Route::get('/dashboard', function () {
-    //     return view('Admin.dashboard');
-    // })->name('dashboard');
     Route::get('/notifications', function () {
         return view('Admin.notifications');
     })->name('notifications');
-    // Route::get('/posts', function () {
-    //     return view('Admin.posts');
-    // })->name('posts');
-    // Route::get('/users', function () {
-    //     return view('Admin.users');
-    // })->name('users');
-    // Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users');

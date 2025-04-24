@@ -167,7 +167,7 @@
 
 
 @section('right-sidebar')
-    <!-- Right sidebar content unchanged -->
+
 @endsection
 
 
