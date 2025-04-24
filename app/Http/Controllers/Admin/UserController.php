@@ -59,7 +59,7 @@ class UserController extends Controller
 
         $users = $query->orderByDesc('created_at')->paginate(10);
 
-        // Add chart data
+
         $growth = $this->getGrowthData();
         $demographics = $this->getDemographicsData();
 
@@ -68,7 +68,7 @@ class UserController extends Controller
 
     public function details(User $user)
     {
-        // Unchanged
+
         try {
             if (!$user->exists) {
                 Log::warning('User not found', ['user_id' => request()->route('user')]);
@@ -105,7 +105,7 @@ class UserController extends Controller
 
     public function suspend(User $user)
     {
-        // Unchanged
+
         try {
             $user->update(['is_active' => !$user->is_active]);
             return redirect()->route('admin.users')->with('success', 'User ' . ($user->is_active ? 'activated' : 'suspended') . ' successfully.');

@@ -26,7 +26,7 @@ class FollowController extends Controller
 
         Auth::user()->connections()->create([
             'friend_id' => $user->id,
-            'status' => 'pending', // Now pending
+            'status' => 'pending', 
         ]);
 
         return redirect()->route('public-profile.show', $user->username)->with('success', 'Follow request sent.');

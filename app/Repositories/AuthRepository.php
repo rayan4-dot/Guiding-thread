@@ -99,4 +99,16 @@ class AuthRepository implements AuthRepositoryInterface
 
     return true;
 }
+
+
+public function deleteAccount($user)
+{
+
+    $user->posts()->delete(); 
+
+
+    $result = $user->forceDelete();
+
+    return $result;
+}
 }

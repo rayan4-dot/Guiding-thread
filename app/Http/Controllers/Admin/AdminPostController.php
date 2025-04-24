@@ -8,6 +8,7 @@ use App\Models\Hashtag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class AdminPostController extends Controller
 {
@@ -27,7 +28,7 @@ class AdminPostController extends Controller
             'active_posts_percent' => 100,
         ];
 
-        // Post List with Filters
+        // post list with Filters
         $query = Post::with(['user', 'hashtags'])
             ->withCount(['reactions', 'comments']);
 
@@ -43,12 +44,11 @@ class AdminPostController extends Controller
             if ($status === 'active') {
                 $query->whereNotNull('id');
             }
-            // Note: 'reported' status not implemented in DB; placeholder
         }
 
         $posts = $query->orderByDesc('created_at')->paginate(6);
 
-        // Chart Data
+        // chart data
         $activity = $this->getActivityData();
         $engagement = $this->getEngagementData();
         $hashtag = $this->getHashtagData();
@@ -70,9 +70,9 @@ class AdminPostController extends Controller
                     if (isset($item['path'])) {
                         $path = ltrim($item['path'], '/storage/');
                         $fullPath = storage_path('app/public/' . $path);
-                        \Log::info('Checking media file', ['path' => $path, 'exists' => file_exists($fullPath)]);
+                        Log::error('Checking media file', ['path' => $path, 'exists' => file_exists($fullPath)]);
                         $mediaItems[] = [
-                            'path' => Storage::url($path), // e.g., /storage/posts/media/...
+                            'path' => Storage::url($path), 
                             'type' => $item['type'] === 'video' ? 'video/mp4' : ($item['type'] === 'image' ? 'image/jpeg' : $post->media_type)
                         ];
                     }
@@ -81,7 +81,7 @@ class AdminPostController extends Controller
         } else if ($post->media_path) {
             $path = ltrim($post->media_path, '/storage/');
             $fullPath = storage_path('app/public/' . $path);
-            \Log::info('Checking media file', ['path' => $path, 'exists' => file_exists($fullPath)]);
+            log::error('Checking media file', ['path' => $path, 'exists' => file_exists($fullPath)]);
             $mediaItems[] = [
                 'path' => Storage::url($path),
                 'type' => $post->media_type === 'video' ? 'video/mp4' : ($post->media_type === 'image' ? 'image/jpeg' : $post->media_type)
@@ -113,7 +113,7 @@ class AdminPostController extends Controller
             })->toArray(),
         ]);
     } catch (\Exception $e) {
-        \Log::error('Failed to fetch post details', ['post_id' => $post->id, 'error' => $e->getMessage()]);
+        Log::error('Failed to fetch post details', ['post_id' => $post->id, 'error' => $e->getMessage()]);
         return response()->json(['error' => 'Failed to fetch post details'], 500);
     }
 }

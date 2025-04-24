@@ -69,6 +69,34 @@ class AuthController extends Controller
     
     
     
+
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+    
+        if (!$user) {
+            return back()->with('error', 'You must be logged in to delete your account.');
+        }
+    
+        $request->validate([
+            'password' => 'required',
+        ]);
+        
+        if (!Hash::check($request->password, $user->password)) {
+            return back()->withErrors(['password' => 'The provided password is incorrect.']);
+        }
+    
+        // supprime le utilisateur via the repository
+        $this->auth->deleteAccount($user);
+    
+        // 
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+    
+        return redirect()->route('login')->with('success', 'Your account has been deleted successfully.');
+    }
+
     
 
     public function logout()

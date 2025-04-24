@@ -11,7 +11,6 @@ class ExploreController extends Controller
 {
     public function index()
     {
-        // Trending Posts (Top 3 by engagement)
         $trendingPosts = Post::with(['user', 'likes', 'comments'])
             ->withCount(['hashtags'])
             ->where('created_at', '>=', now()->subDays(7))
@@ -27,7 +26,6 @@ class ExploreController extends Controller
             ->take(3)
             ->pluck('post');
 
-        // People to Follow (3 users not connected)
         $userIdsToExclude = Auth::check()
             ? Auth::user()->connections()->pluck('friend_id')->merge([Auth::id()])
             : collect([]);
