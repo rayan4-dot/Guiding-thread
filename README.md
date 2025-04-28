@@ -10,13 +10,12 @@ Créer une plateforme de réseau social sécurisée et intuitive, favorisant la 
 - **Gestion des profils** : photo, bio, et informations personnelles.
 - **Amis et Réseaux (Optionnel)** : Ajouter, accepter ou refuser des demandes d’amitié. Notifications pour les nouvelles interactions.
 - **Publications et Réactions** : Création de publications (texte, image, vidéo). Possibilité de commenter et de réagir aux publications.
-- **Groupes et Communautés** : Créer ou rejoindre des groupes basés sur des intérêts. Partage de ressources et discussions dans des groupes dédiés.
 - **Chat en Temps Réel (Optionnel)** : Messagerie privée et discussions de groupe. Notifications en temps réel pour messages et annonces.
 
 ### Fonctionnalités Avancées
 - **Recherche** : Barre de recherche pour trouver des utilisateurs, publications, groupes. Suggestions basées sur les préférences et activités.
 - **Notifications** : Recevoir des notifications pour les nouvelles interactions sur les publications, les demandes d’amitié, et les messages privés , avertissements ou alertes envoyées aux utilisateurs en cas de modération (contenu inapproprié, suspension, etc.)
-- **Administration et Modération** : Tableau de bord pour les administrateurs (gestion des utilisateurs, contenu et permissions). Modération des publications et commentaires.
+- **Administration et Modération** : Tableau de bord pour les administrateurs (gestion des utilisateurs, contenu). Modération des publications et commentaires.
 
 ## Technologies Utilisées
 
@@ -45,16 +44,14 @@ Créer une plateforme de réseau social sécurisée et intuitive, favorisant la 
 3. **Publications et Interactions**  
    En tant qu’utilisateur, je veux publier des contenus (texte, image ou vidéo) et interagir avec les autres.
 
-4. **Groupes**  
-   En tant qu’utilisateur, je veux créer des groupes pour collaborer avec mes pairs et participer à des discussions.
 
-5. **Chat et Communication en Temps Réel (optionnel)**  
+4. **Chat et Communication en Temps Réel (optionnel)**  
    En tant qu’utilisateur, je veux envoyer des messages privés et participer à des discussions de groupe.
 
-6. **Recherche**  
+5. **Recherche**  
    En tant qu’utilisateur, je veux rechercher des utilisateurs, des publications par mots-clés pour trouver facilement les informations.
 
-7. **Administration et Modération**  
+6. **Administration et Modération**  
    En tant qu’administrateur, je veux gérer les comptes utilisateurs et modérer les publications pour garantir un environnement sécurisé.
 
 ## Points Forts du Projet
