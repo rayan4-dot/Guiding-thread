@@ -97,17 +97,25 @@
                                     </div>
                                 @endif
                             @endif
-                            <a href="{{ route('post.show', $post->id) }}" class="block text-primary hover:underline text-sm mt-2">View Post</a>
+                                                       <!-- Views -->
+                                                       <a href="{{ route('post.show', $post->id) }}" class="view flex items-center gap-2 hover:text-primary transition-colors group" aria-label="Views">
+                                    <div class="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
+                                        <i class="fa-regular fa-eye"></i>
+                                    </div>
+                                    <span>{{ $post->views ?? 0 }}</span>
+                                </a>
                         </div>
                         <div class="flex justify-start gap-8">
-                            <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
-                                <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
-                                    <i class="fa-regular fa-comment"></i>
-                                </div>
-                                <span>0</span>
-                            </button>
+                            <a href="{{ route('post.show', $post->id) }}#comments">
+    <button class="flex items-center gap-2 hover:text-blue-500 transition-colors group" aria-label="Comments">
+        <div class="p-2 rounded-full group-hover:bg-blue-500/10 transition-colors">
+            <i class="fa-regular fa-comment"></i>
+        </div>
+        <span>{{ $post->comments()->count() }}</span>
+    </button>
+    </a>
 
-                            <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
+    <form action="{{ route('posts.like', $post) }}" method="POST" class="like-form">
         @csrf
         <button 
             class="like-btn flex items-center gap-2 hover:text-red-500 transition-colors group" 
@@ -121,14 +129,19 @@
             <span class="like-count">{{ $post->likes()->count() }}</span>
         </button>
     </form>
-
-                        </div>
+</div>
                     </div>
                 </div>
             </article>
         @empty
             <p class="p-4 text-gray-400 text-center">No posts yet.</p>
         @endforelse
+
+
+              <!-- Pagination Links -->
+              <div class="p-4">
+            {{ $posts->links() }}
+        </div>
     </section>
 <!-- media modal-->
 
@@ -154,6 +167,11 @@
     transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 }
 
+.like-btn {
+    position: absolute;
+    gap: 0.5rem;
+}
+
 #postModal.hidden, #postModalOverlay.hidden, #mediaModal.hidden {
     opacity: 0;
     transform: scale(0.95);
@@ -163,11 +181,16 @@
     opacity: 1;
     transform: scale(1);
 }
+.view {
+    width: 187px;
+    position: relative;
+    left: 81%;
+    bottom: -36px;}
 </style>
 
 
 @section('right-sidebar')
-
+    <!-- Right sidebar content unchanged -->
 @endsection
 
 
