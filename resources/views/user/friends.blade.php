@@ -7,7 +7,7 @@
     <header class="sticky top-0 z-50 backdrop-blur-xl bg-black/80 border-b border-gray-800">
         <div class="max-w-screen-xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="flex items-center space-x-3">
-                <a href="/profile" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
+                <a href="{{ route('user.profile') }}" class="text-white hover:bg-gray-800 p-2 rounded-full transition-colors">
                     <i class="fa-solid fa-arrow-left"></i>
                 </a>
                 <h2 class="text-lg font-bold text-white">Friends</h2>
@@ -24,177 +24,106 @@
 
     <!-- Main Content -->
     <main class="max-w-screen-xl mx-auto">
-        <!-- Tabs -->
+        <!-- Navigation -->
         <section class="border-b border-gray-800 mb-4">
             <div class="flex px-4">
-                <button id="tabAll" class="tab-button py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors">
-                    All Friends
-                </button>
-                <button id="tabRequests" class="tab-button py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
+                <a href="{{ route('user.friends') }}"
+                   class="py-4 px-6 text-center text-white font-semibold border-b-2 border-blue-500 hover:bg-gray-800/50 transition-colors">
+                    Friends
+                </a>
+                <a href="{{ route('user.requests') }}"
+                   class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-gray-800/50 hover:text-gray-300 transition-colors">
                     Requests
-                </button>
+                </a>
             </div>
         </section>
 
-        <!-- Friends Section -->
-        <div id="friendsContent">
-            <!-- Friends Count -->
-            <section class="px-4 mb-4">
-                <p class="text-gray-400 text-sm">3 Friends</p>
-            </section>
+        <!-- Friends Count -->
+        <section class="px-4 mb-4">
+            <p class="text-gray-400 text-sm">{{ $friends->count() }} {{ Str::plural('Friend', $friends->count()) }}</p>
+        </section>
 
-            <!-- Friends Grid -->
-            <section class="px-4 mb-8">
+        <!-- Friends Grid -->
+        <section class="px-4 mb-8">
+            @if($friends->isEmpty())
+                <p class="text-gray-500 text-center">No friends yet.</p>
+            @else
                 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Friend Card 1 -->
-                    <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors">
-                        <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
-                            <div class="absolute -bottom-8 left-4">
-                                <img src="https://i.pravatar.cc/150?img=1" alt="John Doe" class="w-16 h-16 rounded-full border-4 border-black">
-                            </div>
-                        </div>
-                        <div class="pt-10 px-4 pb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <a href="/profile/johndoe" class="font-bold text-white hover:underline">John Doe</a>
-                                    <p class="text-gray-500 text-sm">@johndoe</p>
+                    @foreach($friends as $friend)
+                        <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors"
+                             data-name="{{ $friend->name }}" data-username="{{ $friend->username }}">
+                            <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
+                                <div class="absolute -bottom-8 left-4">
+                                    <img src="{{ $friend->profile_picture ? Storage::url($friend->profile_picture) : asset('images/default-profile.png') }}"
+                                         alt="{{ $friend->name }}" class="w-16 h-16 rounded-full border-4 border-black">
                                 </div>
                             </div>
-                            <div class="flex gap-2 mt-4">
-                                <button class="bg-gray-800 hover:bg-gray-700 text-white py-1.5 px-3 rounded-lg text-sm">Remove Friend</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Friend Card 2 -->
-                    <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors">
-                        <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
-                            <div class="absolute -bottom-8 left-4">
-                                <img src="https://i.pravatar.cc/150?img=2" alt="Jane Smith" class="w-16 h-16 rounded-full border-4 border-black">
-                            </div>
-                        </div>
-                        <div class="pt-10 px-4 pb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <a href="/profile/janesmith" class="font-bold text-white hover:underline">Jane Smith</a>
-                                    <p class="text-gray-500 text-sm">@janesmith</p>
+                            <div class="pt-10 px-4 pb-4">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <a href="{{ route('public-profile.show', $friend->username) }}"
+                                           class="font-bold text-white hover:underline">{{ $friend->name }}</a>
+                                        <p class="text-gray-500 text-sm">{{ '@' . $friend->username }}</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2 mt-4">
+                                    <form action="{{ route('connection.remove', $friend) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                                class="bg-gray-800 hover:bg-gray-700 text-white py-1.5 px-3 rounded-lg text-sm">
+                                            Remove Connection
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
-                            <div class="flex gap-2 mt-4">
-                                <button class="bg-gray-800 hover:bg-gray-700 text-white py-1.5 px-3 rounded-lg text-sm">Remove Friend</button>
-                            </div>
                         </div>
-                    </div>
-
-                    <!-- Friend Card 3 -->
-                    <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors">
-                        <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
-                            <div class="absolute -bottom-8 left-4">
-                                <img src="https://i.pravatar.cc/150?img=3" alt="Mike Johnson" class="w-16 h-16 rounded-full border-4 border-black">
-                            </div>
-                        </div>
-                        <div class="pt-10 px-4 pb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <a href="/profile/mikej" class="font-bold text-white hover:underline">Mike Johnson</a>
-                                    <p class="text-gray-500 text-sm">@mikej</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button class="bg-gray-800 hover:bg-gray-700 text-white py-1.5 px-3 rounded-lg text-sm">Remove Friend</button>
-                            </div>
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-            </section>
-        </div>
-
-        <!-- Requests Section (Initially Hidden) -->
-        <div id="requestsContent" style="display: none;">
-            <!-- Requests Count -->
-            <section class="px-4 mb-4">
-                <p class="text-gray-400 text-sm">2 Requests</p>
-            </section>
-
-            <!-- Requests Grid -->
-            <section class="px-4 mb-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    <!-- Request Card 1 -->
-                    <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors">
-                        <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
-                            <div class="absolute -bottom-8 left-4">
-                                <img src="https://i.pravatar.cc/150?img=4" alt="Sarah Connor" class="w-16 h-16 rounded-full border-4 border-black">
-                            </div>
-                        </div>
-                        <div class="pt-10 px-4 pb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <a href="/profile/sarahc" class="font-bold text-white hover:underline">Sarah Connor</a>
-                                    <p class="text-gray-500 text-sm">@sarahc</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded-lg text-sm">Accept</button>
-                                <button class="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded-lg text-sm">Reject</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Request Card 2 -->
-                    <div class="friend-card bg-gray-900 rounded-xl overflow-hidden border border-gray-800 hover:border-gray-700 transition-colors">
-                        <div class="relative h-24 bg-gradient-to-r from-blue-900/60 to-purple-900/60">
-                            <div class="absolute -bottom-8 left-4">
-                                <img src="https://i.pravatar.cc/150?img=5" alt="Alex Turner" class="w-16 h-16 rounded-full border-4 border-black">
-                            </div>
-                        </div>
-                        <div class="pt-10 px-4 pb-4">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <a href="/profile/alext" class="font-bold text-white hover:underline">Alex Turner</a>
-                                    <p class="text-gray-500 text-sm">@alext</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2 mt-4">
-                                <button class="bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded-lg text-sm">Accept</button>
-                                <button class="bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded-lg text-sm">Reject</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
+            @endif
+        </section>
     </main>
+
+    <!-- Success/Error Messages -->
+    @if (session('success'))
+        <div class="fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg">
+            {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg">
+            {{ session('error') }}
+        </div>
+    @endif
 @endsection
 
 @section('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const tabAll = document.getElementById('tabAll');
-        const tabRequests = document.getElementById('tabRequests');
-        const friendsContent = document.getElementById('friendsContent');
-        const requestsContent = document.getElementById('requestsContent');
+        try {
+            const searchFriends = document.getElementById('searchFriends');
+            console.log('Search input found:', !!searchFriends);
 
-        tabAll.addEventListener('click', function () {
-            friendsContent.style.display = 'block';
-            requestsContent.style.display = 'none';
+            if (searchFriends) {
+                searchFriends.addEventListener('input', function () {
+                    const query = this.value.toLowerCase();
+                    console.log('Search query:', query);
+                    filterFriends(query);
+                });
+            }
 
-            tabAll.classList.add('text-white', 'border-blue-500');
-            tabAll.classList.remove('text-gray-500', 'border-transparent');
-
-            tabRequests.classList.add('text-gray-500', 'border-transparent');
-            tabRequests.classList.remove('text-white', 'border-blue-500');
-        });
-
-        tabRequests.addEventListener('click', function () {
-            requestsContent.style.display = 'block';
-            friendsContent.style.display = 'none';
-
-            tabRequests.classList.add('text-white', 'border-blue-500');
-            tabRequests.classList.remove('text-gray-500', 'border-transparent');
-
-            tabAll.classList.add('text-gray-500', 'border-transparent');
-            tabAll.classList.remove('text-white', 'border-blue-500');
-        });
+            function filterFriends(query) {
+                const friendCards = document.querySelectorAll('.friend-card');
+                console.log('Friend cards found:', friendCards.length);
+                friendCards.forEach(card => {
+                    const name = card.dataset.name ? card.dataset.name.toLowerCase() : '';
+                    const username = card.dataset.username ? card.dataset.username.toLowerCase() : '';
+                    card.style.display = (name.includes(query) || username.includes(query)) ? 'block' : 'none';
+                });
+            }
+        } catch (error) {
+            console.error('JavaScript error:', error);
+        }
     });
 </script>
 @endsection

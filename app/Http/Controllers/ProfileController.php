@@ -2,37 +2,120 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Connection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Log;
-use App\Models\User;
-use App\Models\Post;
 
 class ProfileController extends Controller
 {
+    // public function index()
+    // {
+    //     $user = Auth::user();
+    //     $posts = $user->posts()->with('user')->latest()->paginate(10); 
+    //     $friends = User::getNonAdminUsers(); 
+
+    //     return view('user.profile', compact('user', 'posts', 'friends'));
+    // }
+
+    // public function showPublicProfile($username)
+    // {
+    //     $user = User::where('username', $username)->firstOrFail();
+    //     $friends = User::where('role_id', 2)
+    //                   ->where('id', '!=', $user->id)
+    //                   ->take(5)
+    //                   ->get();
+
+    //     $isOwnProfile = Auth::check() && Auth::user()->id === $user->id;
+    //     $isFriend = !$isOwnProfile; 
+
+    //     return view('user.public-profile', compact('user', 'friends', 'isOwnProfile', 'isFriend'));
+    // }
+
+
+
     public function index()
     {
         $user = Auth::user();
-        $posts = $user->posts()->with('user')->latest()->paginate(10); 
-        $friends = User::getNonAdminUsers(); 
 
-        return view('user.profile', compact('user', 'posts', 'friends'));
+        // Fetch mutual friends (accepted connections, both directions)
+        $friends = User::whereIn('id', function ($query) use ($user) {
+            $query->select('friend_id')
+                ->from('connections')
+                ->where('user_id', $user->id)
+                ->where('status', 'accepted')
+                ->union(
+                    Connection::select('user_id')
+                        ->where('friend_id', $user->id)
+                        ->where('status', 'accepted')
+                );
+        })->where('role_id', 2)->take(8)->get();
+
+        // Count total friends
+        $friendsCount = Connection::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
+        })->where('status', 'accepted')->count();
+
+        $posts = $user->posts()->with('user')->latest()->paginate(10);
+
+        Log::error('ProfileController::index', [
+            'user_id' => $user->id,
+            'friends_count' => $friends->count(),
+            'total_friends' => $friendsCount,
+            'posts_count' => $posts->count(),
+        ]);
+
+        return view('user.profile', compact('user', 'posts', 'friends', 'friendsCount'));
     }
 
-    public function showPublicProfile($username)
+    public function show($username)
     {
         $user = User::where('username', $username)->firstOrFail();
-        $friends = User::where('role_id', 2)
-                      ->where('id', '!=', $user->id)
-                      ->take(5)
-                      ->get();
+
+        // Fetch mutual friends
+        $friends = User::whereIn('id', function ($query) use ($user) {
+            $query->select('friend_id')
+                ->from('connections')
+                ->where('user_id', $user->id)
+                ->where('status', 'accepted')
+                ->union(
+                    Connection::select('user_id')
+                        ->where('friend_id', $user->id)
+                        ->where('status', 'accepted')
+                );
+        })->where('role_id', 2)->take(8)->get();
+
+        // Count total friends
+        $friendsCount = Connection::where(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
+        })->where('status', 'accepted')->count();
+
+        // Fetch posts
+        $posts = $user->posts()->with('user')->latest()->paginate(10);
 
         $isOwnProfile = Auth::check() && Auth::user()->id === $user->id;
-        $isFriend = !$isOwnProfile; 
+        $isFriend = Auth::check() && Connection::where(function ($query) use ($user) {
+            $query->where('user_id', Auth::id())->where('friend_id', $user->id);
+        })->orWhere(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->where('friend_id', Auth::id());
+        })->where('status', 'accepted')->exists();
 
-        return view('user.public-profile', compact('user', 'friends', 'isOwnProfile', 'isFriend'));
+        Log::info('ProfileController::show', [
+            'user_id' => $user->id,
+            'username' => $username,
+            'friends_count' => $friends->count(),
+            'total_friends' => $friendsCount,
+            'posts_count' => $posts->count(),
+            'is_own_profile' => $isOwnProfile,
+            'is_friend' => $isFriend,
+        ]);
+
+        return view('user.public-profile', compact('user', 'friends', 'friendsCount', 'posts', 'isOwnProfile', 'isFriend'));
     }
+
 
     public function update(Request $request)
     {
