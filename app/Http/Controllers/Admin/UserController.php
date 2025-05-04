@@ -193,4 +193,76 @@ class UserController extends Controller
             ];
         }
     }
+
+
+
+    public function export(Request $request)
+    {
+        try {
+            $query = User::withCount([
+                'posts',
+                'connections' => fn($query) => $query->where('status', 'accepted')
+            ]);
+
+            // Apply search filter
+            if ($search = $request->query('search')) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('username', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // Apply join date filter
+            if ($joinDate = $request->query('join_date')) {
+                $query->where('created_at', '>=', match ($joinDate) {
+                    'today' => Carbon::today(),
+                    'week' => Carbon::now()->startOfWeek(),
+                    'month' => Carbon::now()->startOfMonth(),
+                    '3months' => Carbon::now()->subMonths(3),
+                    default => Carbon::now()->subYears(100),
+                });
+            }
+
+            $users = $query->orderByDesc('created_at')->get();
+
+            // Generate CSV
+            $filename = 'users_export_' . Carbon::now()->format('Ymd_His') . '.csv';
+            $headers = [
+                'Content-Type' => 'text/csv',
+                'Content-Disposition' => "attachment; filename=\"$filename\"",
+            ];
+
+            $columns = ['ID', 'Name', 'Username', 'Email', 'Bio', 'Is Active', 'Posts Count', 'Connections Count', 'Joined At'];
+
+            $callback = function () use ($users, $columns) {
+                $file = fopen('php://output', 'w');
+                fputcsv($file, $columns);
+
+                foreach ($users as $user) {
+                    fputcsv($file, [
+                        $user->id,
+                        $user->name ?? 'N/A',
+                        $user->username ?? 'N/A',
+                        $user->email ?? 'N/A',
+                        $user->bio ?? 'N/A',
+                        $user->is_active ? 'Active' : 'Suspended',
+                        $user->posts_count ?? 0,
+                        $user->connections_count ?? 0,
+                        $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : 'N/A',
+                    ]);
+                }
+
+                fclose($file);
+            };
+
+            return response()->stream($callback, 200, $headers);
+        } catch (\Exception $e) {
+            Log::error('Failed to export users', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->route('admin.users')->with('error', 'Failed to export users: ' . $e->getMessage());
+        }
+    }
 }

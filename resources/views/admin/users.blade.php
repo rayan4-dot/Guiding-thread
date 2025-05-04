@@ -153,7 +153,7 @@
                             <i class="fas fa-ellipsis-v"></i>
                         </label>
                         <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-300 rounded-box w-52">
-                            <li><a><i class="fas fa-download mr-2"></i>Export Data</a></li>
+                            <li><a href="{{ route('admin.users.export', request()->query()) }}"><i class="fas fa-download mr-2"></i>Export Data</a></li>
                         </ul>
                     </div>
                 </div>

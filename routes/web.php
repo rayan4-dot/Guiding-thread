@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PostController;
-use App\Http\Controllers\FollowController;
+
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
@@ -24,12 +24,15 @@ Route::prefix('admin')->name('admin.')->middleware('is_admin')->group(function (
         return view('Admin.notifications');
     })->name('notifications');
 
+
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     // User Management
     Route::get('/users', [UserController::class, 'index'])->name('users');
     Route::get('/users/{user}/details', [UserController::class, 'details'])->name('users.details');
     Route::patch('/users/{user}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::get('/users/export', [UserController::class, 'export'])->name('users.export');
+
 
     // Post Management
     Route::get('/posts', [AdminPostController::class, 'index'])->name('posts');
@@ -73,6 +76,7 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     // Connection Routes
     Route::post('/connect/{user}', [ConnectionController::class, 'sendRequest'])->name('connection.send');
     Route::delete('/connect/{user}', [ConnectionController::class, 'removeConnection'])->name('connection.remove');
+
 
 
         // Friends Management
