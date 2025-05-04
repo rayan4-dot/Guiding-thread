@@ -3,16 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\FollowController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ExploreController;
+use App\Http\Controllers\FriendsController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\Admin\AdminPostController;
-use App\Http\Controllers\PostController;
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\ConnectionController;
 use App\Http\Controllers\PublicProfileController;
+use App\Http\Controllers\Admin\AdminPostController;
 use App\Http\Controllers\Admin\DashboardController;
 
 
@@ -67,8 +69,18 @@ Route::middleware(['auth', 'is_user'])->group(function () {
     Route::post('/posts/{post}/comments', [CommentController::class, 'storeComment'])->name('posts.comments.store');
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
     Route::post('/posts/{post}/like', [PostController::class, 'like'])->name('posts.like');
-    Route::post('/follow/{user}', [FollowController::class, 'follow'])->name('follow');
-    Route::delete('/unfollow/{user}', [FollowController::class, 'unfollow'])->name('unfollow');
+
+    // Connection Routes
+    Route::post('/connect/{user}', [ConnectionController::class, 'sendRequest'])->name('connection.send');
+    Route::delete('/connect/{user}', [ConnectionController::class, 'removeConnection'])->name('connection.remove');
+
+
+        // Friends Management
+        Route::get('/friends', [FriendsController::class, 'index'])->name('user.friends');
+        Route::get('/requests', [FriendsController::class, 'requests'])->name('user.requests');
+        Route::post('/friends/accept/{user}', [FriendsController::class, 'acceptRequest'])->name('friends.accept');
+        Route::post('/friends/reject/{user}', [FriendsController::class, 'rejectRequest'])->name('friends.reject');
+
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/post/{id}', [PostController::class, 'destroy'])->name('post.destroy');
 });

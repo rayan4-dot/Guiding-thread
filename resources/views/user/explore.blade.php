@@ -38,25 +38,22 @@
             <h2 class="text-xl font-bold p-4 border-b border-dark-border">Trending News</h2>
             <div class="space-y-4">
                 @forelse ($trendingPosts as $post)
-                <a href="{{ route('post.show', $post->id) }}" class="block cursor-pointer hover:bg-dark-hover p-4 transition-colors duration-200 border-b border-dark-border">
-    <h3 class="font-bold text-lg">
-        {{ optional($post->user)->name }}
-        <span class="text-sm text-gray-500">
-            · {{ '@' . optional($post->user)->username }}
-        </span>
-    </h3>
-
-    <p class="text-gray-500 text-sm mt-1">
-        {{ Str::limit($post->content, 100) }}
-    </p>
-
-    <p class="text-gray-500 text-sm mt-1">
-        {{ $post->likes->count() }} Likes · 
-        {{ $post->comments->count() }} Comments · 
-        {{ $post->views ?? 0 }} Views
-    </p>
-</a>
-
+                    <a href="{{ route('post.show', $post->id) }}" class="block cursor-pointer hover:bg-dark-hover p-4 transition-colors duration-200 border-b border-dark-border">
+                        <h3 class="font-bold text-lg">
+                            {{ optional($post->user)->name ?? 'Unknown User' }}
+                            <span class="text-sm text-gray-500">
+                                · {{ '@' . (optional($post->user)->username ?? 'unknown') }}
+                            </span>
+                        </h3>
+                        <p class="text-gray-500 text-sm mt-1">
+                            {{ \Illuminate\Support\Str::limit($post->content, 100) }}
+                        </p>
+                        <p class="text-gray-500 text-sm mt-1">
+                            {{ $post->likes->count() }} Likes · 
+                            {{ $post->comments->count() }} Comments · 
+                            {{ $post->views ?? 0 }} Views
+                        </p>
+                    </a>
                 @empty
                     <div class="p-4 text-gray-400">
                         No trending posts found.
@@ -66,7 +63,7 @@
         </div>
     </div>
 
-    <!-- Trending Hashtags Section (from Composer) -->
+    <!-- Trending Hashtags Section -->
     <div class="p-4 space-y-6">
         <div class="bg-dark-lighter rounded-2xl overflow-hidden">
             <h2 class="text-xl font-bold p-4 border-b border-dark-border">Trending for you</h2>
@@ -88,18 +85,17 @@
                     </div>
                 @empty
                     <div class="p-4 text-sm text-gray-400">
-                        Aucune tendance trouvée.
+                        No trending hashtags found.
                     </div>
                 @endforelse
-           
             </div>
         </div>
     </div>
 
-    <!-- People to Follow Section -->
+    <!-- People to Connect Section -->
     <div class="p-4 space-y-6">
         <div class="bg-dark-lighter rounded-2xl overflow-hidden">
-            <h2 class="text-xl font-bold p-4 border-b border-dark-border">Who to follow</h2>
+            <h2 class="text-xl font-bold p-4 border-b border-dark-border">Who to connect with</h2>
             <div class="space-y-4">
                 @forelse ($peopleToFollow as $user)
                     @if ($user->username)
@@ -108,19 +104,25 @@
                                 <img src="{{ $user->profile_picture ? Storage::url($user->profile_picture) : 'https://via.placeholder.com/150' }}" alt="{{ $user->name }}" class="w-12 h-12 rounded-full border border-dark-border">
                                 <div>
                                     <p class="font-bold text-[15px] hover:underline">{{ $user->name }}</p>
-                                    <p class="text-gray-500 text-sm">{{'@' . $user->username }}</p>
+                                    <p class="text-gray-500 text-sm">{{ '@' . $user->username }}</p>
                                 </div>
                             </a>
                             @auth
-                                <form action="{{ route('follow', $user->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="rounded-full bg-white text-black hover:bg-gray-200 text-sm font-bold px-4 py-1.5 transition-colors duration-200" title="Follow">
-                                        Follow
+                                @if(auth()->user()->hasPendingConnection($user))
+                                    <button class="rounded-full bg-gray-500 text-white text-sm font-bold px-4 py-1.5 cursor-not-allowed" disabled title="Connection request pending">
+                                        Pending
                                     </button>
-                                </form>
+                                @else
+                                    <form action="{{ route('connection.send', $user->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="rounded-full bg-white text-black hover:bg-gray-200 text-sm font-bold px-4 py-1.5 transition-colors duration-200" title="Connect">
+                                            Connect
+                                        </button>
+                                    </form>
+                                @endif
                             @else
-                                <a href="{{ route('login') }}" class="rounded-full bg-white text-black hover:bg-gray-200 text-sm font-bold px-4 py-1.5 transition-colors duration-200" title="Log in to follow">
-                                    Follow
+                                <a href="{{ route('login') }}" class="rounded-full bg-white text-black hover:bg-gray-200 text-sm font-bold px-4 py-1.5 transition-colors duration-200" title="Log in to connect">
+                                    Connect
                                 </a>
                             @endauth
                         </div>

@@ -15,6 +15,40 @@
             </a>
             <h2 class="text-lg font-bold text-white">{{ $user->name }}</h2>
         </div>
+        @auth
+            @if(auth()->id() !== $user->id)
+                @if($isFriend)
+                    <form action="{{ route('connection.remove', $user) }}" method="POST">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="bg-gray-800 text-white font-bold px-4 py-2 rounded-full hover:bg-gray-700 transition-colors text-sm" title="Remove Connection">
+                            Remove Connection
+                        </button>
+                    </form>
+                @else
+                    @if(auth()->user()->hasPendingConnection($user))
+                        <button class="bg-gray-500 text-white font-bold px-4 py-2 rounded-full cursor-not-allowed text-sm" disabled title="Connection request pending">
+                            Pending
+                        </button>
+                    @else
+                        <form action="{{ route('connection.send', $user) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-full hover:bg-blue-700 transition-colors text-sm" title="Connect">
+                                Connect
+                            </button>
+                        </form>
+                    @endif
+                @endif
+            @else
+                <a href="{{ route('user.profile') }}" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
+                    Edit Profile
+                </a>
+            @endif
+        @else
+            <a href="{{ route('login') }}" class="bg-blue-600 text-white font-bold px-4 py-2 rounded-full hover:bg-blue-700 transition-colors text-sm" title="Log in to connect">
+                Connect
+            </a>
+        @endauth
     </div>
 </header>
 
@@ -57,38 +91,6 @@
                     <h1 class="text-2xl font-bold text-white">{{ $user->name }}</h1>
                     <p class="text-gray-400 text-sm">{{ '@' . $user->username }}</p>
                 </div>
-                @auth
-                    @if(auth()->id() !== $user->id)
-                        @if($is_following)
-                            <form action="{{ route('unfollow', $user) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Unfollow">
-                                    Unfollow
-                                </button>
-                            </form>
-                        @elseif(auth()->user()->hasPendingFollow($user))
-                            <button class="bg-gray-500 text-white font-bold px-4 py-2 rounded-full cursor-not-allowed text-sm" disabled title="Follow request pending">
-                                Pending
-                            </button>
-                        @else
-                            <form action="{{ route('follow', $user) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Follow">
-                                    Follow
-                                </button>
-                            </form>
-                        @endif
-                    @else
-                        <a href="{{ route('user.profile') }}" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm">
-                            Edit Profile
-                        </a>
-                    @endif
-                @else
-                    <a href="{{ route('login') }}" class="bg-white text-black font-bold px-4 py-2 rounded-full hover:bg-gray-200 transition-colors text-sm" title="Log in to follow">
-                        Follow
-                    </a>
-                @endauth
             </div>
             
             <!-- Bio -->
@@ -99,10 +101,40 @@
             <!-- Stats -->
             <div class="flex space-x-4 mt-3">
                 <div class="flex items-center space-x-1">
+                    <i class="fa-solid fa-user-group text-gray-500"></i>
+                    <span class="text-gray-400 text-sm">{{ $friendsCount }} {{ \Illuminate\Support\Str::plural('Friend', $friendsCount) }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
                     <i class="fa-regular fa-calendar text-gray-500"></i>
                     <span class="text-gray-400 text-sm">Joined {{ $user->created_at->format('F Y') }}</span>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Friends Section -->
+    <section class="px-4 mb-6">
+        <h2 class="text-lg font-bold text-white mb-3">Friends</h2>
+        <div class="grid grid-cols-4 gap-3 sm:grid-cols-6 md:grid-cols-8">
+            @forelse($friends as $friend)
+                <a href="/profile/{{ $friend->username }}" class="relative group flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-full overflow-hidden ring-2 ring-dark-border group-hover:ring-primary transition-all">
+                        <img src="{{ $friend->profile_picture ? Storage::url($friend->profile_picture) : (asset('images/default-profile.png') ?: 'https://via.placeholder.com/150') }}" alt="{{ $friend->name }}" class="w-full h-full object-cover">
+                    </div>
+                    <span class="mt-1 text-xs text-gray-400 text-center truncate w-full">{{ explode(' ', $friend->name)[0] }}</span>
+                    <div class="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-dark-lighter text-white text-xs rounded-lg px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg border border-dark-border w-max">
+                        {{ $friend->name }}
+                    </div>
+                </a>
+            @empty
+                <p class="text-gray-400 text-sm col-span-full">No friends found.</p>
+            @endforelse
+            @if($friends->count() > 0)
+                <a href="/friends" class="flex flex-col items-center justify-center w-12 h-12 rounded-full bg-dark-lighter hover:bg-dark-hover transition-colors">
+                    <i class="fa-solid fa-ellipsis text-gray-400"></i>
+                    <span class="mt-1 text-xs text-gray-400">More</span>
+                </a>
+            @endif
         </div>
     </section>
 
@@ -111,12 +143,6 @@
         <div class="flex px-4">
             <button class="py-4 px-6 text-center text-white font-semibold border-b-2 border-primary hover:bg-dark-hover transition-colors" aria-selected="true">
                 Posts
-            </button>
-            <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-dark-hover hover:text-gray-300 transition-colors">
-                Media
-            </button>
-            <button class="py-4 px-6 text-center text-gray-500 font-semibold border-b-2 border-transparent hover:bg-dark-hover hover:text-gray-300 transition-colors">
-                Likes
             </button>
         </div>
     </section>
@@ -259,7 +285,6 @@
         </div>
     </div>
 </main>
-
 @endsection
 
 @section('right-sidebar')

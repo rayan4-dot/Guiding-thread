@@ -72,6 +72,10 @@
             <!-- Stats -->
             <div class="flex space-x-4 mt-3">
                 <div class="flex items-center space-x-1">
+                    <i class="fa-solid fa-user-group text-gray-500"></i>
+                    <span class="text-gray-400 text-sm">{{ $friendsCount }} {{ Str::plural('Friend', $friendsCount) }}</span>
+                </div>
+                <div class="flex items-center space-x-1">
                     <i class="fa-regular fa-calendar text-gray-500"></i>
                     <span class="text-gray-400 text-sm">Joined {{ Auth::user()->created_at->format('F Y') }}</span>
                 </div>
@@ -104,6 +108,7 @@
             @endif
         </div>
     </section>
+
 
     <!-- Tabs -->
     <section class="border-b border-dark-border mb-2">

@@ -66,19 +66,22 @@ class User extends Authenticatable
         return $this->hasMany(Connection::class, 'user_id');
     }
 
-    public function isFollowing($user)
+    public function isFriend(User $user)
     {
-        return $this->connections()
-            ->where('friend_id', $user->id)
-            ->where('status', 'accepted')
-            ->exists();
+        return Connection::where(function ($query) use ($user) {
+            $query->where('user_id', $this->id)->where('friend_id', $user->id);
+        })->orWhere(function ($query) use ($user) {
+            $query->where('user_id', $user->id)->where('friend_id', $this->id);
+        })->where('status', 'accepted')->exists();
     }
-    public function hasPendingFollow($user)
+
+    public function hasPendingConnection(User $user)
     {
         return $this->connections()
             ->where('friend_id', $user->id)
             ->where('status', 'pending')
             ->exists();
     }
+
 }
 
