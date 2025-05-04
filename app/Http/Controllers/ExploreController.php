@@ -13,7 +13,7 @@ class ExploreController extends Controller
 {
     public function index()
     {
-        // Fetch trending posts (last 7 days, sorted by engagement)
+        //  trending posts (last 7 days
         $trendingPosts = Post::with(['user', 'likes', 'comments'])
             ->withCount(['hashtags'])
             ->where('created_at', '>=', now()->subDays(7))
@@ -29,7 +29,7 @@ class ExploreController extends Controller
             ->take(3)
             ->pluck('post');
 
-        // Fetch trending hashtags (top 5 by post count in last 7 days)
+        //  trending hashtags (top 5 by post count
         $trendingHashtags = Hashtag::withCount(['posts' => function ($query) {
             $query->where('posts.created_at', '>=', now()->subDays(7));
         }])
@@ -37,7 +37,7 @@ class ExploreController extends Controller
             ->take(5)
             ->get();
 
-        // Fetch people to connect with (exclude self, friends, and pending connections)
+        //  people to connect 
         $userIdsToExclude = Auth::check()
             ? Connection::where(function ($query) {
                 $query->where('user_id', Auth::id())

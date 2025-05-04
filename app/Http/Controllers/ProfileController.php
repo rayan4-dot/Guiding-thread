@@ -41,7 +41,7 @@ class ProfileController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch mutual friends (accepted connections, both directions)
+        // display mitual friends
         $friends = User::whereIn('id', function ($query) use ($user) {
             $query->select('friend_id')
                 ->from('connections')
@@ -54,12 +54,12 @@ class ProfileController extends Controller
                 );
         })->where('role_id', 2)->take(8)->get();
 
-        // Count total friends
+        //  total friends
         $friendsCount = Connection::where(function ($query) use ($user) {
             $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
         })->where('status', 'accepted')->count();
-
-        $posts = $user->posts()->with('user')->latest()->paginate(10);
+/** @var \App\Models\User $user */
+$posts = $user->posts()->with('user')->latest()->paginate(10);
 
         Log::error('ProfileController::index', [
             'user_id' => $user->id,
@@ -75,7 +75,7 @@ class ProfileController extends Controller
     {
         $user = User::where('username', $username)->firstOrFail();
 
-        // Fetch mutual friends
+        // display mutual friends
         $friends = User::whereIn('id', function ($query) use ($user) {
             $query->select('friend_id')
                 ->from('connections')
@@ -88,12 +88,12 @@ class ProfileController extends Controller
                 );
         })->where('role_id', 2)->take(8)->get();
 
-        // Count total friends
+        // count total friends
         $friendsCount = Connection::where(function ($query) use ($user) {
             $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
         })->where('status', 'accepted')->count();
 
-        // Fetch posts
+        // display posts
         $posts = $user->posts()->with('user')->latest()->paginate(10);
 
         $isOwnProfile = Auth::check() && Auth::user()->id === $user->id;

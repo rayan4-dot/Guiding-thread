@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Connection;
 use App\Models\User;
+use App\Models\Connection;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class FriendsController extends Controller
 {
@@ -14,7 +15,7 @@ class FriendsController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch mutual friends (accepted connections, both directions)
+        //  mutual friends
         $friends = User::whereIn('id', function ($query) use ($user) {
             $query->select('friend_id')
                 ->from('connections')
@@ -27,7 +28,7 @@ class FriendsController extends Controller
                 );
         })->where('role_id', 2)->get();
 
-        \Log::info('FriendsController::index', [
+        Log::error('FriendsController::index', [
             'user_id' => $user->id,
             'friends_count' => $friends->count(),
         ]);
@@ -39,7 +40,7 @@ class FriendsController extends Controller
     {
         $user = Auth::user();
 
-        // Fetch pending requests (where user is recipient)
+        //  pending requests
         $requests = User::whereIn('id', function ($query) use ($user) {
             $query->select('user_id')
                 ->from('connections')
@@ -47,7 +48,7 @@ class FriendsController extends Controller
                 ->where('status', 'pending');
         })->where('role_id', 2)->get();
 
-        \Log::info('FriendsController::requests', [
+        Log::error('FriendsController::requests', [
             'user_id' => $user->id,
             'requests_count' => $requests->count(),
         ]);

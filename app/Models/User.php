@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
+use App\Models\Connection;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use App\Models\Connection;
 
 class User extends Authenticatable
 {
@@ -47,7 +48,7 @@ class User extends Authenticatable
     public static function getNonAdminUsers()
     {
         return self::where('role_id', 2)
-                   ->where('id', '!=', auth()->id()) 
+                   ->where('id', '!=', Auth::user()->id) 
                    ->take(5) 
                    ->get();
     }

@@ -14,7 +14,7 @@ class PublicProfileController extends Controller
     {
         $user = User::where('username', $username)->firstOrFail();
 
-        // Fetch mutual friends
+        //  mutual friends
         $friends = User::whereIn('id', function ($query) use ($user) {
             $query->select('friend_id')
                 ->from('connections')
@@ -27,12 +27,12 @@ class PublicProfileController extends Controller
                 );
         })->where('role_id', 2)->take(8)->get();
 
-        // Count total friends
+        // count total friends
         $friendsCount = Connection::where(function ($query) use ($user) {
             $query->where('user_id', $user->id)->orWhere('friend_id', $user->id);
         })->where('status', 'accepted')->count();
 
-        // Fetch posts
+        // display posts
         $posts = $user->posts()
             ->with(['user', 'comments', 'likes'])
             ->latest()
